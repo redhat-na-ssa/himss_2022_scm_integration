@@ -1,0 +1,13 @@
+apiVersion: messaging.knative.dev/v1
+kind: Channel
+metadata:
+  name: channel
+  namespace: knative-eventing
+  labels:
+    app: channel
+    app.kubernetes.io/instance: channel
+    app.kubernetes.io/component: channel
+    app.kubernetes.io/name: channel
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+spec: {}
