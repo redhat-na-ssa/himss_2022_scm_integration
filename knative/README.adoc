@@ -7,6 +7,7 @@ sh oc apply -f ../kafka/
 
 publish knative camel service
 
+first install kamelet for insecure kafka sources
 ```
 oc apply -f https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelets/kafka-not-secured-source.kamelet.yaml 
 ```
