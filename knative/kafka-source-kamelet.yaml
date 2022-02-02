@@ -16,6 +16,7 @@ spec:
       apiVersion: messaging.knative.dev/v1
       kind: Channel
       name: channel
+      #replace with knative Service
   source:
     properties:
       allowManualCommit: false
