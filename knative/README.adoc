@@ -15,7 +15,9 @@ oc apply -f https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelet
 ```
 
 publish kafka source
+```
 oc appy -f kafka-source-kamelet.yaml
+```
 
 alternate Instructions for Knative Kafka Souce
 
