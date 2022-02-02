@@ -1,11 +1,15 @@
 TODO:
 
 create cluster and topic
-```sh oc apply -f ../kafka/```
+```
+sh oc apply -f ../kafka/
+```
 
 publish knative camel service
 
+```
 oc apply -f https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelets/kafka-not-secured-source.kamelet.yaml 
+```
 
 publish kafka source
 
