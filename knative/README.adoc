@@ -1,7 +1,7 @@
 TODO:
 
 create cluster and topic
-
+```sh oc apply -f ../kafka/```
 
 publish knative camel service
 

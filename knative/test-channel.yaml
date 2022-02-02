@@ -2,7 +2,6 @@ apiVersion: messaging.knative.dev/v1
 kind: Channel
 metadata:
   name: channel
-  namespace: knative-eventing
   labels:
     app: channel
     app.kubernetes.io/instance: channel
