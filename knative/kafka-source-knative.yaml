@@ -14,7 +14,7 @@ metadata:
     openshift.io/generated-by: OpenShiftWebConsole
 spec:
   # this requires that the namespace be included otherwise the broker will not be found and the kafka source will not be ready
-  bootstrapServers: [scm-cluster-kafka-brokers.namespace.svc:9092]
+  bootstrapServers: [scm-cluster-kafka-brokers.SCM_NAMESPACE.svc:9092]
   topics: [scm-file-topic]
   consumerGroup: scm-file-db-mapper
   net:
