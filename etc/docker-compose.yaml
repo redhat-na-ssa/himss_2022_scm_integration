@@ -1,0 +1,76 @@
+version: '3.7'
+
+services:
+
+  zookeeper:
+    container_name: zookeeper
+    image: quay.io/strimzi/kafka:latest-kafka-2.6.0
+    command: [
+      "sh", "-c",
+      "bin/zookeeper-server-start.sh config/zookeeper.properties"
+    ]
+    ports:
+      - "2181:2181"
+    environment:
+      LOG_DIR: /tmp/logs
+    networks:
+      - default
+
+# https://github.com/pubnub/kafka-bridge/blob/master/kafka/plain/docker-compose.yaml
+#   Allows for kafka client that is external to the container network (ie: on the host) to connect to this Kafka broker and consume messages
+#   NOTE: via this configuration, kafka is available to external clients on port: 9094
+  kafka:
+    container_name: kafka
+    image: quay.io/strimzi/kafka:latest-kafka-2.6.0
+    command: [
+      "sh", "-c",
+      "bin/kafka-server-start.sh config/server.properties --override listeners=INSIDE://:9092,OUTSIDE://:9094 --override listener.security.protocol.map=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT --override advertised.listeners=INSIDE://:9092,OUTSIDE://localhost:9094 --override zookeeper.connect=zookeeper:2181 --override inter.broker.listener.name=INSIDE"
+    ]
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      LOG_DIR: "/tmp/logs"
+    networks:
+      - default
+
+  kafdrop:
+    container_name: kafdrop
+    image: docker.io/obsidiandynamics/kafdrop:3.27.0
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    depends_on:
+      - kafka
+    networks:
+      - default
+
+  psql-scm:
+    container_name: psql-scm
+    image: registry.redhat.io/rhel8/postgresql-12
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      PGPORT: 5432
+      POSTGRESQL_USER: scm
+      POSTGRESQL_PASSWORD: scm
+      POSTGRESQL_DATABASE: scm
+      POSTGRESQL_MAX_PREPARED_TRANSACTIONS: 10
+      SCRIPT_DIR: /opt/sql
+    volumes:
+    - ./scm/db/rhpam-psql.conf:/opt/app-root/src/postgresql-cfg/rhpam-psql.conf:bind
+    - ./scm/db/sql/:/opt/sql:bind
+    - ./scm/db/create_database.sh:/opt/app-root/src/postgresql-start/create_database.sh:bind
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
