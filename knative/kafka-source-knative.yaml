@@ -27,6 +27,10 @@ spec:
       key: {}
   sink:
     ref:
-      apiVersion: messaging.knative.dev/v1
-      kind: Channel
-      name: channel
+      # apiVersion: messaging.knative.dev/v1
+      # kind: Channel
+      # name: channel
+      #replace with knative Service
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: scm-echo
