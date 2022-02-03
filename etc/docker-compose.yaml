@@ -71,6 +71,16 @@ services:
     networks:
       - default
 
+  grafana:
+    container_name: grafana
+    image: docker.io/grafana/grafana:7.5.11
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
 networks:
   default:
     driver: bridge
