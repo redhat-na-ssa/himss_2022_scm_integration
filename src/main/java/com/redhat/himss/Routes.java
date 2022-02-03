@@ -2,6 +2,11 @@ package com.redhat.himss;
 
 import org.jboss.logging.Logger;
 
+import io.smallrye.mutiny.operators.multi.builders.CollectionBasedMulti;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -24,6 +29,7 @@ import org.apache.camel.model.dataformat.BindyType;
  */
 public class Routes extends RouteBuilder {
 
+    private static final String RESPONSE_HEADER="RESPONSE_HEADER";
     private static Logger log = Logger.getLogger(Routes.class);
 
 
@@ -35,6 +41,9 @@ public class Routes extends RouteBuilder {
 
         restConfiguration().bindingMode(RestBindingMode.json);
 
+
+
+        /*****                Consume from HTTP           *************/
         rest("/sanityCheck")
                 .get()
                 .route()
@@ -43,45 +52,63 @@ public class Routes extends RouteBuilder {
 
         // curl -v -X POST -F "data=@src/test/himss/nogood/AM3X-365115-1002-1-2021285.txt" localhost:8180/gzippedFiles
         // curl -v -X POST -F "data=@src/test/himss/good/AM3X-365115-2021285.tgz" localhost:8180/gzippedFiles
+        // curl -v -X POST -F "data=@src/test/himss/good/AM3X-365115-2021285.tgz" -F "data=@src/test/himss/good/DDAS-365115-2021285.tgz" localhost:8180/gzippedFiles
         rest("/gzippedFiles")
           .description("Consume Gzipped Files")
           .consumes("multipart/form-data")
           .post()
-          .to("seda:verifyPayload");
+          .to("direct:verifyPayload");
         
-        from("seda:verifyPayload")
+        from("direct:verifyPayload")
           .routeId("verifyPayload")
+          .setHeader(RESPONSE_HEADER, constant("ALL FILES PERSISTED"))
           .doTry()
-            .process(new PayloadValidator())
-            .process(e -> {
-                Map<String, DataHandler> attachments = e.getIn(AttachmentMessage.class).getAttachments();
-                for(Entry<String, DataHandler> attachment  : attachments.entrySet()) {
-                    byte[] bytes = attachment.getValue().getInputStream().readAllBytes();
-                    e.getIn().setBody(bytes);
-                }
-            })
-            //.split(body())
-            .to("file:{{himss.scm.gzip.location}}")
+                .process(new PayloadValidator())
+                .process(e -> {
+                    Map<String, DataHandler> attachments = e.getIn(AttachmentMessage.class).getAttachments();
+                    Collection<byte[]> aList = new ArrayList<byte[]>();
+                    for(Entry<String, DataHandler> attachment  : attachments.entrySet()) {
+                        byte[] bytes = attachment.getValue().getInputStream().readAllBytes();
+                        aList.add(bytes);
+                    }
+                    e.getIn().setBody(aList);
+                })
+                .to("seda:writeVerifiedPayloadToFilesystem")
             
           .doCatch(ValidationException.class)
-            .setHeader("CamelHttpResponseCode").constant("415")
-            .setBody(exceptionMessage())//.simple(exceptionMessage().toString())
-            .log(LoggingLevel.ERROR, exceptionMessage().toString())
+                .setHeader("CamelHttpResponseCode").constant("415")
+                .setHeader(RESPONSE_HEADER, exceptionMessage())
+                .log(LoggingLevel.ERROR, exceptionMessage().toString())
+          .doFinally()
+                .setBody().header(RESPONSE_HEADER)
           .end();
+            
+        from("seda:writeVerifiedPayloadToFilesystem")
+            .routeId("direct:writeVerifiedPayloadToFilesystem")
+            .log("writeVerifiedPayloadToFilesystem")
+            .split(body())
+            .to("file:{{himss.scm.gzip.location}}");
+
+
+
+
+    
+        /*****                Consume from filesystem           *************/
+        from("file:{{himss.scm.gzip.location}}?initialDelay=0&delay=1000&autoCreate=true&delete=true")
+            .routeId("direct:unpackGzip")
+                .unmarshal()
+                .gzipDeflater()
+                .log("file = ${header.CamelFileName}}")
+                .split(new TarSplitter())
+                  .streaming()
+                  .to("direct:processTextFile")
+                .end();
 
         from("direct:processTextFile")
             .routeId("direct:processTextFile")
             .log("file = ${header.CamelFileName}}")
             .end();
 
-        from("file:{{himss.scm.gzip.location}}?initialDelay=0&delay=1000&autoCreate=true&noop=true")
-            .routeId("direct:unpackGzip")
-                .unmarshal()
-                .gzipDeflater()
-                .split(new TarSplitter())
-                  .streaming()
-                  .to("direct:processTextFile")
-                .end();
 
     }
 
@@ -92,6 +119,7 @@ public class Routes extends RouteBuilder {
             AttachmentMessage attMsg = exchange.getIn(AttachmentMessage.class);
             Set<String> attachmentNames = attMsg.getAttachmentNames();
             for(String aName : attachmentNames) {
+                log.info("PayloadValidator.process()   fileName = "+aName);
                 if(!aName.endsWith("tgz") && !aName.endsWith("tar.gz"))
                   throw new ValidationException("Invalid file suffix: "+aName);
             }
