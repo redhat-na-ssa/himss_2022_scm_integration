@@ -54,4 +54,16 @@ oc apply -f kafka-source-knative.yaml
 ```
 
 instructions to test
-kafka spammer
+
+Quick test
+```
+oc -n kafka run kafka-producer \
+    -ti --image=quay.io/strimzi/kafka:latest-kafka-2.7.0 --rm=true \
+    --restart=Never -- bin/kafka-console-producer.sh \
+    --broker-list scm-cluster-kafka-brokers:9092:9092 --topic scm-file-topic
+
+```
+
+Autoscale Test
+
+run spammer
