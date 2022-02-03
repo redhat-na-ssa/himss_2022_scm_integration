@@ -3,7 +3,7 @@ TODO: table of contents
 
 ## Prerequisites
 
-- Install OpenShift Serverless - Knative Serving
+- Install OpenShift Serverless - Knative Serving, Knative Eventing
 - Install Camel K Operator
 
 ## create cluster and topic
@@ -14,9 +14,16 @@ sh oc apply -f ../kafka/
 
 ## publish knative camel service
 
+set max scale to 10, auto scaling concurrency target to 1. This should ultimately be a higher number 
+
 ```
-kamel run ScmEchoService.java --dev --name scm-echo -d camel-rest --trait knative-service.enabled=true #dev mode, with live coding
-# kamel run ScmEchoService.java --name scm-echo -d camel-rest --trait knative-service.enabled=true 
+#dev mode, with live coding
+kamel run ScmEchoService.java --dev --name scm-echo -d camel-rest --trait knative-service.enabled=true \
+ --trait knative-service.autoscaling-target=1 --trait knative-service.max-scale=10 
+
+#just deploy
+# kamel run ScmEchoService.java --name scm-echo -d camel-rest --trait knative-service.enabled=true \
+#  --trait knative-service.autoscaling-target=1 --trait knative-service.max-scale=10
 ```
 If this is the first time run, it may take a while to deploy. To check status run if you didn't do `kamel run` in dev mode
 ```
@@ -24,21 +31,26 @@ kamel get scm-echo
 ```
 
 ## Install the Kafka Source
-### Instructions for CamelK Kafka Source (Preferred)
+### Instructions for Kamelet Kafka Source 
+
+A Note: The knative service does not scale up as fast with a knative kafka source. The latter scales up to 10 pods with 1000 messages, while for the kamelet  kafka souce only scales up to 2 *even* with the autoscaling concurrency target set to a low number like 1. Introducing an intermediary knative channel as the sink for the Kamelet Binding for the kafka Source has the effect of scaling the pods to 10.
 
 first install kamelet for insecure kafka sources
 ```
 oc apply -f https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelets/kafka-not-secured-source.kamelet.yaml 
 ```
 
-publish kafka source
+publish the channel, the kamelet binding for the  kafka source, and subscription to the knative service
 ```
-oc appy -f kafka-source-kamelet.yaml
+oc apply -f scm-channel
+oc apply -f kafka-source-kamelet.yaml
+oc apply -f scm-channel-sub.yaml
 ```
+
 
 ### alternate Instructions for Knative Kafka Souce
 
-Make sure Knative-eventing and  Knative-Kafka are installed in the OpenShift Serverless Operator. Whenconfiguring KnativeKafka, only the source needs to be enabled. For e.g.
+Make Knative-Kafka is installed in the OpenShift Serverless Operator. When configuring KnativeKafka, only the source needs to be enabled. For e.g.
 ```yaml
 apiVersion: operator.serverless.openshift.io/v1alpha1
 kind: KnativeKafka
@@ -75,3 +87,5 @@ oc -n kafka run kafka-producer \
 ```
 oc run kafka-spammer -it --image=jonnyman9/kafka-python-spammer:latest --rm=true --restart=Never --env KAFKA_BOOTSTRAP_HOST=scm-cluster-kafka-brokers --env TOPIC_NAME=scm-file-topic --env TIMES=100
 ```
+
+you can modify the TIMES env variable to decrease orincrease the number of messages generated

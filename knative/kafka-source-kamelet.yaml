@@ -13,13 +13,13 @@ metadata:
 spec:
   sink:
     ref:
-      # apiVersion: messaging.knative.dev/v1
-      # kind: Channel
-      # name: channel
-      #replace with knative Service
-      apiVersion: serving.knative.dev/v1
-      kind: Service
-      name: scm-echo
+      apiVersion: messaging.knative.dev/v1
+      kind: Channel
+      name: scm-channel
+      # #replace with knative Service - doesn't scale up as fast
+      # apiVersion: serving.knative.dev/v1
+      # kind: Service
+      # name: scm-echo
   source:
     properties:
       allowManualCommit: false

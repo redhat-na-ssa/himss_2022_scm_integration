@@ -1,7 +1,7 @@
 apiVersion: messaging.knative.dev/v1
 kind: Channel
 metadata:
-  name: channel
+  name: scm-channel
   labels:
     app: channel
     app.kubernetes.io/instance: channel

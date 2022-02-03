@@ -29,7 +29,7 @@ spec:
     ref:
       # apiVersion: messaging.knative.dev/v1
       # kind: Channel
-      # name: channel
+      # name: scm-channel
       #replace with knative Service
       apiVersion: serving.knative.dev/v1
       kind: Service
