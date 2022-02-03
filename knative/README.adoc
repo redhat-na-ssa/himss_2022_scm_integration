@@ -1,13 +1,24 @@
-TODO:
+# Test serverless/kafka source infratructure
+TODO: table of contents
+
+Prerequisites
+
+- Install OpenShift Serverless - Knative Serving
+- Install Camel K 
 
 create cluster and topic
 ```
+oc new-project scm-test
 sh oc apply -f ../kafka/
 ```
 
 publish knative camel service
 
-Instructions for CamelK Kafka Souce
+```
+kamel run ScmEchoService.java --dev --name scm-echo -d camel-rest --trait knative-service.enabled=true
+```
+
+Instructions for CamelK Kafka Source (Preferred)
 
 first install kamelet for insecure kafka sources
 ```
@@ -21,6 +32,26 @@ oc appy -f kafka-source-kamelet.yaml
 
 alternate Instructions for Knative Kafka Souce
 
+Make sure Knative Kafka is installed. Only the source needs to be enabled
+```yaml
+apiVersion: operator.serverless.openshift.io/v1alpha1
+kind: KnativeKafka
+metadata:
+    name: knative-kafka
+    namespace: knative-eventing
+spec:
+    channel:
+        enabled: false
+    source:
+        enabled: true 
+```
+
+Modify the kakfa source to update the namespace name
+
+```
+TODO: some sed
+oc apply -f kafka-source-knative.yaml
+```
 
 instructions to test
 kafka spammer
