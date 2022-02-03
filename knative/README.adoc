@@ -18,7 +18,8 @@ sh oc apply -f ../kafka/
 kamel run ScmEchoService.java --dev --name scm-echo -d camel-rest --trait knative-service.enabled=true
 ```
 
-## Instructions for CamelK Kafka Source (Preferred)
+## Install the Kafka Source
+### Instructions for CamelK Kafka Source (Preferred)
 
 first install kamelet for insecure kafka sources
 ```
@@ -30,7 +31,7 @@ publish kafka source
 oc appy -f kafka-source-kamelet.yaml
 ```
 
-## alternate Instructions for Knative Kafka Souce
+### alternate Instructions for Knative Kafka Souce
 
 Make sure Knative Kafka is installed. Only the source needs to be enabled
 ```yaml
