@@ -1,6 +1,6 @@
 echo "creating SCM database"
 
-#psql -d $POSTGRESQL_DATABASE < ${SCRIPT_DIR}/postgresql-springboot-jbpm-schema.sql
+psql -d $POSTGRESQL_DATABASE < ${SCRIPT_DIR}/ddl.sql
 
 psql -d $POSTGRESQL_DATABASE -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${POSTGRESQL_USER};"
 psql -d $POSTGRESQL_DATABASE -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${POSTGRESQL_USER};"
