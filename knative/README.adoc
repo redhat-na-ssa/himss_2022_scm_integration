@@ -4,7 +4,7 @@ TODO: table of contents
 ## Prerequisites
 
 - Install OpenShift Serverless - Knative Serving
-- Install Camel K 
+- Install Camel K Operator
 
 ## create cluster and topic
 ```
@@ -15,7 +15,12 @@ sh oc apply -f ../kafka/
 ## publish knative camel service
 
 ```
-kamel run ScmEchoService.java --dev --name scm-echo -d camel-rest --trait knative-service.enabled=true
+kamel run ScmEchoService.java --dev --name scm-echo -d camel-rest --trait knative-service.enabled=true #dev mode, with live coding
+# kamel run ScmEchoService.java --name scm-echo -d camel-rest --trait knative-service.enabled=true 
+```
+If this is the first time run, it may take a while to deploy. To check status run if you didn't do `kamel run` in dev mode
+```
+kamel get scm-echo
 ```
 
 ## Install the Kafka Source
@@ -33,7 +38,7 @@ oc appy -f kafka-source-kamelet.yaml
 
 ### alternate Instructions for Knative Kafka Souce
 
-Make sure Knative Kafka is installed. Only the source needs to be enabled
+Make sure Knative-eventing and  Knative-Kafka are installed in the OpenShift Serverless Operator. Whenconfiguring KnativeKafka, only the source needs to be enabled. For e.g.
 ```yaml
 apiVersion: operator.serverless.openshift.io/v1alpha1
 kind: KnativeKafka
@@ -61,10 +66,12 @@ oc apply -f kafka-source-knative.yaml
 oc -n kafka run kafka-producer \
     -ti --image=quay.io/strimzi/kafka:latest-kafka-2.7.0 --rm=true \
     --restart=Never -- bin/kafka-console-producer.sh \
-    --broker-list scm-cluster-kafka-brokers:9092:9092 --topic scm-file-topic
+    --broker-list scm-cluster-kafka-brokers:9092 --topic scm-file-topic
 
 ```
 
 ### Autoscale Test
 
-run spammer
+```
+oc run kafka-spammer -it --image=jonnyman9/kafka-python-spammer:latest --rm=true --restart=Never --env KAFKA_BOOTSTRAP_HOST=scm-cluster-kafka-brokers --env TOPIC_NAME=scm-file-topic --env TIMES=100
+```
