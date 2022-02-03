@@ -41,7 +41,7 @@ There are two options:
 
 ### Option 1: Instructions for Kamelet Kafka Source 
 
-A Note: The knative service does not scale up as fast with a knative kafka source. The latter scales up to 10 pods with 1000 messages, while for the kamelet  kafka souce only scales up to 2 *even* with the autoscaling concurrency target set to a low number like 1. Introducing an intermediary knative channel as the sink for the Kamelet Binding for the kafka Source has the effect of scaling the pods to 10.
+A Note: The knative service does not scale up as fast compared to a knative kafka source. With knative kafka source, the knative service scales up to 10 pods with 1000 messages, while  the kamelet kafka souce only scales up to 2 *even* with the autoscaling concurrency target set to a low number like 1. Introducing an intermediary knative channel as the sink for the Kamelet Binding for the kafka Source has the effect of scaling the pods to 10.
 
 First install the kamelet for insecure kafka sources. It is not a default kamelet installed by the Camel K operator
 ```
