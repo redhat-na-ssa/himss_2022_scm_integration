@@ -34,7 +34,8 @@ kamel get scm-echo
 ```
 
 ## Install the Kafka Source
-There are two options
+There are two options:
+
 - Use Kamelet (from Camel K) Binding as the Kafka Source
 - Use Knative Kafka (OpenShift Serverless) as the Kafka Source
 
