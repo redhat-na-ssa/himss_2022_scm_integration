@@ -1,7 +1,13 @@
 package com.redhat.himss;
 
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.spi.config.Configuration;
 
+import io.agroal.api.AgroalDataSource;
+import io.quarkus.agroal.DataSource;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -9,6 +15,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.activation.DataHandler;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -21,12 +29,16 @@ import org.apache.camel.model.rest.RestBindingMode;
 /**
  * Camel route definitions.
  */
+@ApplicationScoped
 public class Routes extends RouteBuilder {
 
     private static final String RESPONSE_HEADER="RESPONSE_HEADER";
     private static final String FILE_NAME_HEADER="FILE_NAME_HEADER";
-    private static Logger log = Logger.getLogger(Routes.class);
-
+    private static Logger log = Logger.getLogger(Routes.class);    
+    
+    @Inject
+    @DataSource("camel-ds")
+    AgroalDataSource dataSource;
 
     public Routes() {
     }
@@ -35,8 +47,6 @@ public class Routes extends RouteBuilder {
     public void configure() throws Exception {
 
         restConfiguration().bindingMode(RestBindingMode.json);
-
-
 
         /*****                Consume from HTTP           *************/
         rest("/sanityCheck")
@@ -163,15 +173,36 @@ public class Routes extends RouteBuilder {
         public void process(Exchange exchange){
             try{
                 byte[] fileNameHeaderBytes = (byte[])exchange.getIn().getHeader(FILE_NAME_HEADER);
-                String fileNameHeader = new String(fileNameHeaderBytes);
+                String fHeader = new String(fileNameHeaderBytes);
+
+
+                // 1) Build appropriate prepared statement based on file type
+                StringBuilder sBuilder = new StringBuilder();
+                if(fHeader.startsWith(Util.AM3X)){
+                    sBuilder.append("insert into "+Util.AM3X+"(column1, column2) VALUES (?,?)");
+                }else if(fHeader.startsWith(Util.DDAS)) {
+                    sBuilder.append("insert into "+Util.DDAS+"(column1, column2) VALUES (?,?)");
+                }else if(fHeader.startsWith(Util.DETM)) {
+                    sBuilder.append("insert into "+Util.DETM+"(column1, column2) VALUES (?,?)");
+                }else{
+                    throw new ValidationException("wrong file type: "+fHeader);
+                }
+                Connection con = dataSource.getConnection();
+                PreparedStatement pStatement = con.prepareStatement(sBuilder.toString());
+
+
+                // 2) Iterate through rows of body and add batch
                 String body = (String)exchange.getIn().getBody();
                 String[] rows = body.split("\n");
-                log.info("CSVPayloadProcessor.process() "+fileNameHeader+" :   # of rows = "+rows.length);
+                log.info("CSVPayloadProcessor.process() "+fHeader+" :   # of rows = "+rows.length);
                 for(String row : rows){
-                    //log.info("row = "+row);
                     String[] fields = row.split("\\|");
                     //log.info("# of fields = "+fields.length);
+                    pStatement.setString(1, "CHANGE ME");
+                    pStatement.setInt(2, 49);
+                    pStatement.addBatch();
                 }
+                int[] results = pStatement.executeBatch();
             }catch(Throwable x){
                 x.printStackTrace();
             }
