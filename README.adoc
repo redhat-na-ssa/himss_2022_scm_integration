@@ -2,3 +2,9 @@
 
 SCM Integration Demo
 
+== Business Dashboard
+
+. First draft 
++
+image::docs/images/b_kpis.png[]
+
