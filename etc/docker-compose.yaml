@@ -71,6 +71,7 @@ services:
     networks:
       - default
 
+  # https://github.com/cirocosta/sample-grafana
   grafana:
     container_name: grafana
     image: docker.io/grafana/grafana:7.5.11
@@ -80,6 +81,10 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+    - ./grafana/datasources/postgresql.yaml:/etc/grafana/provisioning/datasources/postgresql.yaml:bind
+    - ./grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml:bind
+    - ./grafana/dashboards/scm-business-KPIs.json:/var/lib/grafana/dashboards/scm-business-KPIs.json:bind
 
 networks:
   default:
