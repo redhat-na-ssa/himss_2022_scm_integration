@@ -119,6 +119,14 @@
       <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
 
+
+    <!-- Metrics    -->
+    <dependency>
+        <!-- Provides both JVM and micrprofile metrics  in either JSON or OpenMetrics formats-->
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-smallrye-metrics</artifactId>
+    </dependency>
+
     
 
     <dependency>

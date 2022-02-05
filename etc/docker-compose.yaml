@@ -71,6 +71,19 @@ services:
     networks:
       - default
 
+  prometheus:
+    container_name: prometheus
+    image: docker.io/prom/prometheus:v2.33.1
+    restart: always
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+    - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:bind
+    extra_hosts:
+      - "quarkus-dev-host:192.168.1.7"
+
   # https://github.com/cirocosta/sample-grafana
   grafana:
     container_name: grafana
@@ -82,10 +95,11 @@ services:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
-    - ./grafana/datasources/postgresql.yaml:/etc/grafana/provisioning/datasources/postgresql.yaml:bind
+    - ./grafana/datasources/all.yaml:/etc/grafana/provisioning/datasources/all.yaml:bind
     - ./grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml:bind
     - ./grafana/dashboards/scm-business-KPIs.json:/var/lib/grafana/dashboards/scm-business-KPIs.json:bind
 
 networks:
   default:
     driver: bridge
+

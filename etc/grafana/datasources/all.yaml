@@ -4,7 +4,14 @@ apiVersion: 1
 # # list of datasources to insert/update depending
 # # on what's available in the database
 datasources:
-   # <string, required> name of the datasource. Required
+ - name: 'Prometheus'
+   type: 'prometheus'
+   access: 'proxy'
+   org_id: 1
+   url: 'http://prometheus:9090'
+   is_default: false
+   version: 1
+   editable: true
  - name: PostgreSQL
    # <string, required> datasource type. Required
    type: postgres
@@ -36,4 +43,3 @@ datasources:
    editable: true
    readOnly: false
    typeLogoUrl: public/app/plugins/datasource/postgres/img/postgresql_logo.svg
-

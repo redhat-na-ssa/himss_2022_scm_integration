@@ -1,13 +1,5 @@
 package com.redhat.himss;
 
-import org.jboss.logging.Logger;
-import org.jboss.resteasy.spi.config.Configuration;
-
-import io.agroal.api.AgroalDataSource;
-import io.quarkus.agroal.DataSource;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -18,6 +10,7 @@ import javax.activation.DataHandler;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.jboss.logging.Logger;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
@@ -32,14 +25,11 @@ import org.apache.camel.model.rest.RestBindingMode;
 @ApplicationScoped
 public class Routes extends RouteBuilder {
 
-    private static final String RESPONSE_HEADER="RESPONSE_HEADER";
-    private static final String FILE_NAME_HEADER="FILE_NAME_HEADER";
-    private static Logger log = Logger.getLogger(Routes.class);    
+    private static Logger log = Logger.getLogger(Routes.class);  
     
     @Inject
-    @DataSource("camel-ds")
-    AgroalDataSource dataSource;
-
+    CSVPayloadProcessor csvPayLoadProcessor;
+    
     public Routes() {
     }
 
@@ -66,7 +56,7 @@ public class Routes extends RouteBuilder {
         
         from("direct:verifyPayload")
           .routeId("verifyPayload")
-          .setHeader(RESPONSE_HEADER, constant("ALL FILES PERSISTED"))
+          .setHeader(Util.RESPONSE_HEADER, constant("ALL FILES PERSISTED"))
           .doTry()
                 .process(new GzipPayloadValidator())
                 .process(e -> {
@@ -82,10 +72,10 @@ public class Routes extends RouteBuilder {
             
           .doCatch(ValidationException.class)
                 .setHeader("CamelHttpResponseCode").constant("415")
-                .setHeader(RESPONSE_HEADER, exceptionMessage())
+                .setHeader(Util.RESPONSE_HEADER, exceptionMessage())
                 .log(LoggingLevel.ERROR, exceptionMessage().toString())
           .doFinally()
-                .setBody().header(RESPONSE_HEADER)
+                .setBody().header(Util.RESPONSE_HEADER)
           .end();
             
         from("seda:writeVerifiedPayloadToFilesystem")
@@ -110,7 +100,7 @@ public class Routes extends RouteBuilder {
                       int lastDirIndex = originalFileName.lastIndexOf("/");
                       String parsedFileName = originalFileName.substring(lastDirIndex+1);
                       log.debug("prepKafkaProducer()  originalFileName = "+originalFileName+" : parsedFileName = "+parsedFileName);
-                      e.getIn().setHeader(FILE_NAME_HEADER, parsedFileName);
+                      e.getIn().setHeader(Util.FILE_NAME_HEADER, parsedFileName);
                   })
                   //.to("direct:processTextFile")
                   .to("kafka:{{scm_topic_name}}?brokers={{kafka.bootstrap.servers}}")
@@ -126,7 +116,9 @@ public class Routes extends RouteBuilder {
         from("kafka:{{scm_topic_name}}?brokers={{kafka.bootstrap.servers}}&groupId=scm&autoOffsetReset=earliest")
             .doTry()
                 .process(new CSVPayloadValidator())
-                .process(new CSVPayloadProcessor())
+                .process(e -> {
+                    csvPayLoadProcessor.process(e);
+                })
             .doCatch(ValidationException.class)
                 .log(LoggingLevel.ERROR, exceptionMessage().toString())
             .end();
@@ -144,7 +136,7 @@ public class Routes extends RouteBuilder {
             for(String aName : attachmentNames) {
                 log.info("GzipPayloadValidator.process()   fileName = "+aName);
                 if(!aName.endsWith("tgz") && !aName.endsWith("tar.gz"))
-                  throw new ValidationException("Invalid file suffix: "+aName);
+                  throw new ValidationException("000001 Invalid file suffix: "+aName);
             }
         }
     }
@@ -156,73 +148,19 @@ public class Routes extends RouteBuilder {
         @Override
         public void process(Exchange exchange) throws ValidationException {
 
-            Object fileNameHeaderObj = exchange.getIn().getHeader(FILE_NAME_HEADER);
+            Object fileNameHeaderObj = exchange.getIn().getHeader(Util.FILE_NAME_HEADER);
             if(fileNameHeaderObj == null)
-              throw new ValidationException("Must pass kafka header of: "+FILE_NAME_HEADER);
+              throw new ValidationException("000002 Must pass kafka header of: "+Util.FILE_NAME_HEADER);
+
+            String fHeader = new String((byte[])fileNameHeaderObj);
+            if(!fHeader.endsWith(Util.TXT))
+              throw new ValidationException("000003 Invalid file suffix: "+fHeader);
+            
 
             Object bObj = exchange.getIn().getBody();
             if(!bObj.getClass().getName().equals(String.class.getName()))
-              throw new ValidationException("Payload not of type String : "+bObj.getClass().getName());
+              throw new ValidationException("000004 Payload not of type String : "+bObj.getClass().getName());
 
-        }
-    }
-
-    class CSVPayloadProcessor implements Processor {
-
-        @Override
-        public void process(Exchange exchange){
-            try{
-                byte[] fileNameHeaderBytes = (byte[])exchange.getIn().getHeader(FILE_NAME_HEADER);
-                String fHeader = new String(fileNameHeaderBytes);
-
-
-                // 1) Build appropriate prepared statement based on file type
-                StringBuilder sBuilder = new StringBuilder();
-                if(fHeader.startsWith(Util.AM3X)){
-                    sBuilder.append("insert into "+Util.AM3X+"(column1, column2) VALUES (?,?)");
-                }else if(fHeader.startsWith(Util.DDAS)) {
-                    sBuilder.append("insert into "+Util.DDAS+"(column1, column2) VALUES (?,?)");
-                }else if(fHeader.startsWith(Util.DETM)) {
-                    sBuilder.append("insert into "+Util.DETM+"(column1, column2) VALUES (?,?)");
-                }else{
-                    throw new ValidationException("wrong file type: "+fHeader);
-                }
-                Connection con = dataSource.getConnection();
-                PreparedStatement pStatement = con.prepareStatement(sBuilder.toString());
-
-
-                // 2) Iterate through rows of body and add batch
-                String body = (String)exchange.getIn().getBody();
-                String[] rows = body.split("\n");
-                log.info("CSVPayloadProcessor.process() "+fHeader+" :   # of rows = "+rows.length);
-                for(String row : rows){
-                    String[] fields = row.split("\\|");
-                    //log.info("# of fields = "+fields.length);
-                    pStatement.setString(1, "CHANGE ME");
-                    pStatement.setInt(2, 49);
-                    pStatement.addBatch();
-                }
-                int[] results = pStatement.executeBatch();
-            }catch(Throwable x){
-                x.printStackTrace();
-            }
-
-        }
-    }
-
-    class ValidationException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        public ValidationException() {
-            super();
-        }
-
-        public ValidationException(String message){
-            super(message);
-        }
-
-        public ValidationException(String message, Throwable cause){
-            super(message, cause);
         }
     }
 }
