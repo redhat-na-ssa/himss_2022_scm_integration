@@ -12,7 +12,7 @@ import io.quarkus.agroal.DataSource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.jboss.logging.Logger;
-
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -25,6 +25,9 @@ public class CSVPayloadProcessor {
     @Inject
     @DataSource("camel-ds")
     AgroalDataSource dataSource;
+
+    @ConfigProperty(name="himss.scm.delay.db.persist.millis", defaultValue = "0")
+    int delayDBPersistMillis = 0;
 
     @Counted(name = "csvProcessed", description = "How many csv payloads have been processed.")
     @Timed(name = "csvProcessingTimer", description = "A measure of how long it takes to process a CSV file.", unit = MetricUnits.MILLISECONDS)
@@ -61,6 +64,10 @@ public class CSVPayloadProcessor {
                 pStatement.setString(1, "CHANGE ME");
                 pStatement.setInt(2, 49);
                 pStatement.addBatch();
+            }
+            if(this.delayDBPersistMillis > 0){
+                log.warnv("will intentionally delay persist by the following millis: {0}", this.delayDBPersistMillis);
+                Thread.sleep(this.delayDBPersistMillis);
             }
             int[] results = pStatement.executeBatch();
         }catch(Throwable x){
