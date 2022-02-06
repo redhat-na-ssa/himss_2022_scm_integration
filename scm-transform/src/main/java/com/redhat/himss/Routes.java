@@ -113,7 +113,7 @@ public class Routes extends RouteBuilder {
 
         
         /************               Consume from Kafka          *****************/
-        from("kafka:{{scm_topic_name}}?brokers={{kafka.bootstrap.servers}}&groupId=scm&autoOffsetReset=earliest&consumersCount={{himss.kafka.consumer.count}}")
+        from("kafka:{{himss.scm_topic_name}}?brokers={{kafka.bootstrap.servers}}&groupId=scm&autoOffsetReset=earliest&consumersCount={{himss.kafka.consumer.count}}")
             .doTry()
                 .process(new CSVPayloadValidator())
                 .process(e -> {
