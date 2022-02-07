@@ -13,8 +13,14 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
 
- - job_name: 'himss2022-scm-processing'
+ - job_name: 'himss2022-scm-frontend'
    metrics_path: '/q/metrics'
    scrape_interval: 3s
    static_configs:
      - targets: ['quarkus-dev-host:8180']
+
+ - job_name: 'himss2022-scm-backend'
+   metrics_path: '/q/metrics'
+   scrape_interval: 3s
+   static_configs:
+     - targets: ['quarkus-dev-host:8280']
