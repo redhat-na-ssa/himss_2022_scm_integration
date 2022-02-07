@@ -27,9 +27,6 @@ public class Routes extends RouteBuilder {
 
     private static Logger log = Logger.getLogger(Routes.class);  
     
-    @Inject
-    CSVPayloadProcessor csvPayLoadProcessor;
-    
     public Routes() {
     }
 
@@ -103,26 +100,13 @@ public class Routes extends RouteBuilder {
                       e.getIn().setHeader(Util.FILE_NAME_HEADER, parsedFileName);
                   })
                   //.to("direct:processTextFile")
-                  .to("kafka:{{scm_topic_name}}?brokers={{kafka.bootstrap.servers}}")
+                  .to("kafka:{{himss.scm_topic_name}}?brokers={{kafka.bootstrap.servers}}")
                 .end();
 
         from("direct:processTextFile")
             .routeId("direct:processTextFile")
             .log("file = ${header.CamelFileName}}")
             .end();
-
-        
-        /************               Consume from Kafka          *****************/
-        from("kafka:{{himss.scm_topic_name}}?brokers={{kafka.bootstrap.servers}}&groupId=scm&autoOffsetReset=earliest&consumersCount={{himss.kafka.consumer.count}}")
-            .doTry()
-                .process(new CSVPayloadValidator())
-                .process(e -> {
-                    csvPayLoadProcessor.process(e);
-                })
-            .doCatch(ValidationException.class)
-                .log(LoggingLevel.ERROR, exceptionMessage().toString())
-            .end();
-
 
     }
 
@@ -141,26 +125,4 @@ public class Routes extends RouteBuilder {
         }
     }
 
-
-
-    class CSVPayloadValidator implements Processor {
-
-        @Override
-        public void process(Exchange exchange) throws ValidationException {
-
-            Object fileNameHeaderObj = exchange.getIn().getHeader(Util.FILE_NAME_HEADER);
-            if(fileNameHeaderObj == null)
-              throw new ValidationException("000002 Must pass kafka header of: "+Util.FILE_NAME_HEADER);
-
-            String fHeader = new String((byte[])fileNameHeaderObj);
-            if(!fHeader.endsWith(Util.TXT))
-              throw new ValidationException("000003 Invalid file suffix: "+fHeader);
-            
-
-            Object bObj = exchange.getIn().getBody();
-            if(!bObj.getClass().getName().equals(String.class.getName()))
-              throw new ValidationException("000004 Payload not of type String : "+bObj.getClass().getName());
-
-        }
-    }
 }
