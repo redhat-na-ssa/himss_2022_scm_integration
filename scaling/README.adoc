@@ -3,7 +3,7 @@
 :toclevels: 2
 
 ## About
-This demonstrates how to scale a consumer service based on the number of messages generated with three different methods. The first two ways use a intermediary resource to consume messages from a kafka topic and forwards the messages via HTTP to the service. OpenShift Serverless is utilized to scale up the service based on load. The third method uses the Kubernetes Horizontal Pod Autoscaler (HPA) but simplifies the configuration by using a joint MS-Red Hat upstream project called KEDA. With KEDA we can scale up a non-HTTP service that consumes directly from the kafka topic based on the number of records on the topic.
+This demonstrates how to scale a consumer service based on the number of messages generated with three different methods. The first two ways use a intermediary resource to consume messages from a kafka topic and forwards the messages via HTTP to the service. https://cloud.redhat.com/learn/topics/serverless[OpenShift Serverless] is utilized to scale up the service based on load. The third method uses the Kubernetes Horizontal Pod Autoscaler (HPA) but simplifies the configuration by using a joint MS-Red Hat upstream project called https://keda.sh/[KEDA]. With KEDA we can scale up a non-HTTP service that consumes directly from the kafka topic based on the number of records on the topic.
 
 ## Prerequisites
 * Openshift 4.8 or greater
@@ -13,7 +13,7 @@ This demonstrates how to scale a consumer service based on the number of message
        ** Install the Camel K Operator
        ** Download the Camel K CLI tool (kamel) from the Command Line Tools menu on your cluster
 * If scaling via Option 3
-   - Install the KEDA Operator and create a `KedaController`` in the generated keda namespace
+   - Install the KEDA Operator and create a `KedaController` in the generated keda namespace
 
 ## create cluster and topic
 ```
@@ -44,7 +44,7 @@ kamel get scm-echo
 ## Setup Scaling
 There are three options:
 
-- Use Kamelet (from Camel K) Binding as the Kafka Source
+- Use https://camel.apache.org/camel-k/1.8.x/kamelets/kamelets.html[Kamelet] (from https://camel.apache.org/camel-k/[Camel K]) Binding as the Kafka Source
 - Use Knative Kafka (OpenShift Serverless) as the Kafka Source
 - Use KEDA to scale based on the number of records on the Kafka Topic 
 
@@ -72,7 +72,7 @@ image::../docs/images/kamelet.png[]
 
 ### Option 2: Instructions for Knative Kafka Souce
 
-Ensure that Knative Kafka is installed via the OpenShift Serverless Operator. When configuring KnativeK afka, only the source attribute needs to be enabled for this example. For e.g.
+Ensure that Knative Kafka is installed via the OpenShift Serverless Operator. When configuring `KnativeKafka``, only the source attribute needs to be enabled for this example. For e.g.
 ```yaml
 apiVersion: operator.serverless.openshift.io/v1alpha1
 kind: KnativeKafka
