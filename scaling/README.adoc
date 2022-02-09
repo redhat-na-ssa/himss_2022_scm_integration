@@ -1,13 +1,19 @@
-# Test serverless/kafka source infratructure
+# Test Scaling Infrastructure
 :toc:
 :toclevels: 2
 
+## About
+This demonstrates how to scale a consumer service based on the number of messages generated with three different methods. The first two ways use a intermediary resource to consume messages from a kafka topic and forwards the messages via HTTP to the service. https://cloud.redhat.com/learn/topics/serverless[OpenShift Serverless] is utilized to scale up the service based on load. The third method uses the Kubernetes Horizontal Pod Autoscaler (HPA) but simplifies the configuration by using a joint MS-Red Hat upstream project called https://keda.sh/[KEDA]. With KEDA we can scale up a non-HTTP service that consumes directly from the kafka topic based on the number of records on the topic.
+
 ## Prerequisites
 * Openshift 4.8 or greater
-* Install OpenShift Serverless - Knative Serving, Knative Eventing
-* To deploy the test service
-    - Install the Camel K Operator
-    - Download the Camel K CLI tool (kamel) from the Command Line Tools menu on your cluster
+* If scaling via Option 1 or 2:
+   - Install OpenShift Serverless - Knative Serving, Knative Eventing
+   - To deploy the test service
+       ** Install the Camel K Operator
+       ** Download the Camel K CLI tool (kamel) from the Command Line Tools menu on your cluster
+* If scaling via Option 3
+   - Install the KEDA Operator and create a `KedaController` in the generated keda namespace
 
 ## create cluster and topic
 ```
@@ -16,7 +22,7 @@ oc new-project $SCM_NAMESPACE
 oc apply -f ../kafka/
 ```
 
-## publish knative camel service
+## publish knative camel service (If running Option 1 or 2)
 
 We set the max scale to 10, and the auto scaling concurrency target to 1. This should ultimately be a higher number but for this test we want to scale up faster. The value can be modified as needed.
 
@@ -35,15 +41,16 @@ If this is the first time the `kamel run` command is executed, the resulting scm
 kamel get scm-echo
 ```
 
-## Install the Kafka Source
-There are two options:
+## Setup Scaling
+There are three options:
 
-- Use Kamelet (from Camel K) Binding as the Kafka Source
+- Use https://camel.apache.org/camel-k/1.8.x/kamelets/kamelets.html[Kamelet] (from https://camel.apache.org/camel-k/[Camel K]) Binding as the Kafka Source
 - Use Knative Kafka (OpenShift Serverless) as the Kafka Source
+- Use KEDA to scale based on the number of records on the Kafka Topic 
 
 ### Option 1: Instructions for Kamelet Kafka Source 
 
-The Camel K Operator should be installedtab
+The Camel K Operator should be installed
 
 [NOTE]
 The knative service does not scale up as fast compared to a knative kafka source. With knative kafka source, the knative service scales up to 10 pods with 1000 messages, while  the kamelet kafka souce only scales up to 2 *even* with the autoscaling concurrency target set to a low number like 1. Introducing an intermediary knative channel as the sink for the Kamelet Binding for the kafka Source has the effect of scaling the pods to 10.
@@ -60,10 +67,12 @@ oc apply -f kafka-source-kamelet.yaml
 oc apply -f scm-channel-sub.yaml
 ```
 
+image::../docs/images/kamelet.png[]
+
 
 ### Option 2: Instructions for Knative Kafka Souce
 
-Ensure that Knative Kafka is installed via the OpenShift Serverless Operator. When configuring KnativeK afka, only the source attribute needs to be enabled for this example. For e.g.
+Ensure that Knative Kafka is installed via the OpenShift Serverless Operator. When configuring `KnativeKafka``, only the source attribute needs to be enabled for this example. For e.g.
 ```yaml
 apiVersion: operator.serverless.openshift.io/v1alpha1
 kind: KnativeKafka
@@ -83,6 +92,35 @@ Modify the kakfa source to update the namespace name
 sed "s/SCM_NAMESPACE/$SCM_NAMESPACE/" kafka-source-knative.yaml | oc apply -f -
 ```
 
+image::../docs/images/knative.png[]
+
+### Option 3: Instructions for KEDA Scaling
+
+Make sure the Keda Operator is installed and a `KedaController` has been created in the keda namespace.
+
+Modify the customer resources to update the namespace name and create the resources
+
+```
+sed "s/SCM_NAMESPACE/$SCM_NAMESPACE/" scm-kafka-echo/src/main/keda/*.yaml | oc apply -f -
+```
+
+Confirm that the service is deployed and a `HorizontalPodAutoscaler` has been created
+```
+oc get deployment scm-kafka-echo && oc get hpa 
+```
+
+```
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+scm-kafka-echo   0/0     0            0           4m8s
+NAME                          REFERENCE                   TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+keda-hpa-kafka-scaledobject   Deployment/scm-kafka-echo   <unknown>/50 (avg)   1         100       0          2m2s
+```
+
+image::../docs/images/keda.png[]
+
+Note: KEDA experimental features are not yet in the OpenShift serverless version of knative
+but see https://github.com/knative-sandbox/eventing-autoscaler-keda
+
 ## Testing
 
 ### Quick test
@@ -100,3 +138,5 @@ oc run kafka-spammer -it --image=jonnyman9/kafka-python-spammer:latest --rm=true
 ```
 
 The `TIMES` env variable  can be modified to change the numner of messages generated
+
+Once you run, notice that the number of pods are autoscaled

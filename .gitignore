@@ -34,3 +34,4 @@ dependency-reduced-pom.xml
 hs_err_pid*
 
 .vscode
+.DS_Store
