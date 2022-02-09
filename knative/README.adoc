@@ -60,6 +60,8 @@ oc apply -f kafka-source-kamelet.yaml
 oc apply -f scm-channel-sub.yaml
 ```
 
+image::../docs/images/kamelet.png[]
+
 
 ### Option 2: Instructions for Knative Kafka Souce
 
@@ -82,6 +84,8 @@ Modify the kakfa source to update the namespace name
 ```
 sed "s/SCM_NAMESPACE/$SCM_NAMESPACE/" kafka-source-knative.yaml | oc apply -f -
 ```
+
+image::../docs/images/knative.png[]
 
 ## Testing
 
