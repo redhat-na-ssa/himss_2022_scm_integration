@@ -8,7 +8,7 @@ This demonstrates how to scale a consumer service based on the number of message
 ## Prerequisites
 * Openshift 4.8 or greater
 * If scaling via Option 1 or 2:
-   - Install OpenShift Serverless - Knative Serving, Knative Eventing
+   - Install OpenShift Serverless version 1.19 - Knative Serving, Knative Eventing
    - To deploy the test service
        ** Install the Camel K Operator
        ** Download the Camel K CLI tool (kamel) from the Command Line Tools menu on your cluster
@@ -118,7 +118,7 @@ keda-hpa-kafka-scaledobject   Deployment/scm-kafka-echo   <unknown>/50 (avg)   1
 
 image::../docs/images/keda.png[]
 
-Note: KEDA experimental features are not yet in the OpenShift serverless version of knative
+Note: KEDA experimental features are not yet in the OpenShift serverless version (1.19) of knative
 but see https://github.com/knative-sandbox/eventing-autoscaler-keda
 
 ## Testing
