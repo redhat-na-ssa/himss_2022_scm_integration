@@ -2,9 +2,10 @@ version: '3.7'
 
 services:
 
+#   Corresponds to AMQ Streams: amqstreams.v2.0.1-0 
   zookeeper:
     container_name: zookeeper
-    image: quay.io/strimzi/kafka:latest-kafka-2.6.0
+    image: quay.io/strimzi/kafka:latest-kafka-3.0.0
     command: [
       "sh", "-c",
       "bin/zookeeper-server-start.sh config/zookeeper.properties"
@@ -19,9 +20,10 @@ services:
 # https://github.com/pubnub/kafka-bridge/blob/master/kafka/plain/docker-compose.yaml
 #   Allows for kafka client that is external to the container network (ie: on the host) to connect to this Kafka broker and consume messages
 #   NOTE: via this configuration, kafka is available to external clients on port: 9094
+#   Corresponds to AMQ Streams: amqstreams.v2.0.1-0 
   kafka:
     container_name: kafka
-    image: quay.io/strimzi/kafka:latest-kafka-2.6.0
+    image: quay.io/strimzi/kafka:latest-kafka-3.0.0
     command: [
       "sh", "-c",
       "bin/kafka-server-start.sh config/server.properties --override listeners=INSIDE://:9092,OUTSIDE://:9094 --override listener.security.protocol.map=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT --override advertised.listeners=INSIDE://:9092,OUTSIDE://localhost:9094 --override zookeeper.connect=zookeeper:2181 --override inter.broker.listener.name=INSIDE"

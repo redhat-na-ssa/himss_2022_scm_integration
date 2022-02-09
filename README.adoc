@@ -94,3 +94,7 @@ application_com_redhat_himss_CSVPayloadProcessor_csvProcessingTimer_seconds{quan
 application_com_redhat_himss_ValidationException_dirtyCSVDataCount_total 0.0
 
 -----
+
+== Reference
+
+. link:https://www.dropbox.com/s/jesbtetdqhxowh8/Inside%20Vignettes%2002-04-22.pdf?dl=0[graphics]
