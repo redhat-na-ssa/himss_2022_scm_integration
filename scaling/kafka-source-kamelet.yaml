@@ -1,0 +1,38 @@
+# pre-req camel k installed in cluster
+# also apply  https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelets/kafka-not-secured-source.kamelet.yaml 
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: scm-cluster-kafka-source
+  labels:
+    app: scm-cluster-kafka-source
+    app.kubernetes.io/component: scm-cluster-kafka-source
+    app.kubernetes.io/instance: scm-cluster-kafka-source
+    app.kubernetes.io/name: scm-cluster-kafka-source
+    app.kubernetes.io/part-of: event-sources-app
+spec:
+  sink:
+    ref:
+      apiVersion: messaging.knative.dev/v1
+      kind: Channel
+      name: scm-channel
+      # #replace with knative Service - doesn't scale up as fast
+      # apiVersion: serving.knative.dev/v1
+      # kind: Service
+      # name: scm-echo
+  source:
+    properties:
+      allowManualCommit: false
+      autoCommitEnable: true
+      autoOffsetReset: latest
+      # pollOnError: ERROR_HANDLER
+      # saslMechanism: PLAIN
+      # securityProtocol: SASL_SSL
+      bootstrapServers: 'scm-cluster-kafka-brokers:9092'
+      topic: scm-file-topic
+      consumerGroup: scm-file-db-mapper
+    ref:
+      apiVersion: camel.apache.org/v1alpha1
+      kind: Kamelet
+      # name: kafka-source
+      name: kafka-not-secured-source
