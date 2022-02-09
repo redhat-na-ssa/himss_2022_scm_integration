@@ -1,3 +1,4 @@
+---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -9,7 +10,7 @@ spec:
   triggers:
     - metadata:
         # sed/change namepsace
-        bootstrapServers: 'scm-cluster-kafka-bootstrap.NAMESPACE.svc:9092'
+        bootstrapServers: 'scm-cluster-kafka-bootstrap.SCM_NAMESPACE.svc:9092'
         consumerGroup: scm-camel-quarkus
         lagThreshold: '50'
         # number of pods appears to be roughly lagthreshold/pollinginterval

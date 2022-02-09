@@ -20,7 +20,7 @@ spec:
       containers:
         - env:
             - name: KAFKA_BOOTSTRAP_SERVERS
-              value: scm-cluster-kafka-bootstrap.NAMESPACE.svc:9092
+              value: scm-cluster-kafka-bootstrap.SCM_NAMESPACE.svc:9092
           name: scm-kafka-echo
           image: quay.io/gbengataylor/scm-kafka-echo
           imagePullPolicy: IfNotPresent

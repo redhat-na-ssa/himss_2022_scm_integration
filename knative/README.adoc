@@ -35,11 +35,12 @@ If this is the first time the `kamel run` command is executed, the resulting scm
 kamel get scm-echo
 ```
 
-## Install the Kafka Source
-There are two options:
+## Setup Scaling
+There are three options:
 
 - Use Kamelet (from Camel K) Binding as the Kafka Source
 - Use Knative Kafka (OpenShift Serverless) as the Kafka Source
+- Use KEDA to scale based on the number of records on the Kafka Topic 
 
 ### Option 1: Instructions for Kamelet Kafka Source 
 
@@ -86,6 +87,19 @@ sed "s/SCM_NAMESPACE/$SCM_NAMESPACE/" kafka-source-knative.yaml | oc apply -f -
 ```
 
 image::../docs/images/knative.png[]
+
+### Option 3: Instructions for KEDA Scaling
+
+TODO: install KEDA and the KEDA controller 
+
+Modify the customer resources to update the namespace name and create the resources
+
+```
+sed "s/SCM_NAMESPACE/$SCM_NAMESPACE/" scm-kafka-echo/src/main/keda/*.yaml | oc apply -f -
+```
+
+Note: KEDA experimental features not in OpenShift serverless version of knative
+but see https://github.com/knative-sandbox/eventing-autoscaler-keda
 
 ## Testing
 
