@@ -41,3 +41,8 @@ scm_psql_db_name: scm
 undeploy_psql_scm: false
 
 scm_frontend_app_name: scm-frontend
+
+uninstall_cluster_resources: true
+uninstall_delete_project: false
+
+namespace_monitoring: "{{ project_name }}"

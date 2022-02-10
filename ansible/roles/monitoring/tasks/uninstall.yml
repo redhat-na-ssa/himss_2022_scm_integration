@@ -1,0 +1,156 @@
+---
+
+- name: "delete grafana cluster monitoring clusterrole binding"
+  oc_obj:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    kind: clusterrolebinding
+    name: "grafana-cluster-monitoring-view-{{ project_admin }}"
+
+- name: "delete get-namespaces clusterrolebinding"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    kind: clusterrolebinding
+    name: "{{ project_admin }}-get-namespaces"
+
+- name: "delete get-namespaces clusterrole"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: get-namespaces
+    kind: clusterrole
+  when: uninstall_cluster_resources|bool == true
+
+- name: "delete grafana custom resource"
+  oc_obj:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    kind: grafana
+    name: "{{ grafana_cr_name }}"
+    namespace: "{{ namespace }}"
+
+- name: "delete grafana datasource"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ grafana_datasource_name }}"
+    namespace: "{{ namespace }}"
+    kind: grafanadatasource
+
+- name: "delete grafana outh proxy secret"
+  oc_secret:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    namespace: "{{ namespace }}"
+    name: "{{ grafana_oauth_proxy_secret }}"
+
+- name: "delete grafana operator in {{ namespace }}"
+  import_role:
+    name: ../roles/operator_olm
+    tasks_from: uninstall
+  vars:
+    operator_name: grafana-operator
+    subscription_namespace: "{{ namespace }}"
+    subscription_name: "{{ grafana_operator_subscription_name }}"
+    csv_prefix: "{{ grafana_operator_csv_prefix }}"
+
+- name: "get all installplans in {{ namespace }} namespace"
+  oc_obj:
+    state: list
+    oc_binary: "{{ openshift_cli }}"
+    kind: InstallPlan
+    namespace: "{{ namespace }}"
+  register: r_install_plan
+
+- name: "set grafana operator install plan name"
+  set_fact:
+    grafana_operator_install_plan_name: "{{ r_install_plan.ansible_module_results.results[0]['items'] | to_json | from_json | json_query(query) }}"
+  vars:
+    query: >-
+      [?starts_with(spec.clusterServiceVersionNames[0], 'grafana-operator')].metadata.name|[0]
+
+- name: "find all grafana operator related csv"
+  set_fact:
+    grafana_operator_csvs: "{{ r_install_plan.ansible_module_results.results[0]['items'] | to_json | from_json | json_query(query) }}"
+  vars:
+    query: >-
+      [?starts_with(spec.clusterServiceVersionNames[0], 'grafana-operator')].spec.clusterServiceVersionNames
+
+- name: "delete all grafana operator related csv"
+  when: grafana_operator_csvs | length > 0
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    kind: ClusterServiceVersion
+    name: "{{ item }}"
+    namespace: "{{ namespace }}"
+  loop: "{{ grafana_operator_csvs[0] }}"
+
+- name: "delete grafana operator subscription"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ grafana_operator_subscription_name }}"
+    namespace: "{{ namespace }}"
+    kind: subscription
+
+- name: "delete grafana operator installplan"
+  when:
+  - grafana_operator_install_plan_name is defined
+  - grafana_operator_install_plan_name | default("") | length > 0
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    kind: InstallPlan
+    namespace: "{{ namespace }}"
+    name: "{{ grafana_operator_install_plan_name }}"
+
+- name: "delete prometheus cr"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ prometheus_cr_name }}"
+    namespace: "{{ namespace }}"
+    kind: prometheus
+ 
+- name: "delete prometheus route"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ prometheus_route_name }}"
+    namespace: "{{ namespace }}"
+    kind: route
+
+- name: "delete prometheus service"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ prometheus_service_name }}"
+    namespace: "{{ namespace }}"
+    kind: service
+
+- name: "delete prometheus outh proxy secret"
+  oc_secret:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    namespace: "{{ namespace }}"
+    name: "{{ prometheus_oauth_proxy_secret }}"
+
+
+- name: "delete prometheus operator in {{ namespace }}"
+  import_role:
+    name: ../roles/operator_olm
+    tasks_from: uninstall
+  vars:
+    operator_name: prometheus-operator
+    subscription_namespace: "{{ namespace }}"
+    subscription_name: "{{ prometheus_operator_subscription_name }}"
+    csv_prefix: "{{ prometheus_operator_csv_prefix }}"
+
+- name: "delete project"
+  oc_project:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    name: "{{ namespace }}"
+  when: uninstall_delete_project|bool == true

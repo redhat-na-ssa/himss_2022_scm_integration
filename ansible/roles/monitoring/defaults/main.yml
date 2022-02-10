@@ -1,0 +1,49 @@
+---
+
+# prometheus operator
+prometheus_operator_subscription_template: subscription.yml
+prometheus_operator_packagemanifest: prometheus
+prometheus_operator_deployment_name: prometheus-operator
+prometheus_operator_subscription_name: prometheus
+prometheus_operator_subscription_channel: beta
+prometheus_operator_subscription_automatic_installplan_approval: false
+prometheus_operator_subscription_starting_csv: "prometheusoperator.0.47.0"
+prometheus_operator_csv_prefix: prometheusoperator
+
+# grafana operator
+grafana_operator_subscription_template: subscription.yml
+grafana_operator_packagemanifest: grafana-operator
+grafana_operator_deployment_name: grafana-operator-controller-manager
+grafana_operator_subscription_name: grafana-operator
+grafana_operator_subscription_channel: v4
+grafana_operator_subscription_automatic_installplan_approval: false
+grafana_operator_subscription_starting_csv: "grafana-operator.v4.1.1"
+grafana_operator_csv_prefix: grafana-operator
+
+prometheus_image: quay.io/openshift/origin-prometheus:4.7
+prometheus_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
+prometheus_storage_request: 10Gi
+prometheus_retention: 45d
+prometheus_requests_cpu: 50m
+prometheus_requests_memory: 400Mi
+prometheus_limits_cpu: 500m
+prometheus_limits_memory: 1Gi
+prometheus_serviceaccount_template: prometheus-serviceaccount.yml
+prometheus_cr_template: prometheus-cr.yml
+prometheus_cr_name: "{{ project_admin }}-er-monitoring"
+prometheus_oauth_proxy_secret: prometheus-k8s-proxy
+prometheus_route_template: prometheus-route.yml
+prometheus_route_name: prometheus-route
+prometheus_service_template: prometheus-service.yml
+prometheus_service_name: prometheus-service
+prometheus_tls_secret: prometheus-k8s-tls
+
+grafana_cr_name: grafana
+grafana_cr_template: grafana-cr.yml
+grafana_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
+grafana_oauth_proxy_secret: grafana-k8s-proxy
+grafana_datasource_template: grafana-datasource.yml
+grafana_datasource_name: prometheus
+
+clusterrole_get_namespaces_template: get-namespaces-clusterrole.yml
+grafana_cluster_monitoring_view_crb_template: grafana-cluster-monitoring-view-crb.yml

@@ -1,13 +1,12 @@
 ---
 
-- name: Deploy AMQ Streams
+- name: Deploy monitoring
   hosts: localhost
   connection: local
   gather_facts: false
   run_once: true
   vars_files:
     - group_vars/all.yml
-    - group_vars/kafka_cluster.yml
 
   tasks:
-    - include: tasks/amq-streams.yml
+    - include: tasks/monitoring.yml
