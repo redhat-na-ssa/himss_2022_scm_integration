@@ -67,7 +67,7 @@ services:
       POSTGRESQL_MAX_PREPARED_TRANSACTIONS: 10
       SCRIPT_DIR: /opt/sql
     volumes:
-    - ./scm/db/rhpam-psql.conf:/opt/app-root/src/postgresql-cfg/rhpam-psql.conf:bind
+    - ./scm/db/psql.conf:/opt/app-root/src/postgresql-cfg/psql.conf:bind
     - ./scm/db/sql/:/opt/sql:bind
     - ./scm/db/create_database.sh:/opt/app-root/src/postgresql-start/create_database.sh:bind
     networks:

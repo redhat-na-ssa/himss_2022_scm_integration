@@ -1,0 +1,43 @@
+---
+
+home_dir: "{{ playbook_dir }}/.."
+
+# resources dir
+resources_base_dir: "{{ home_dir }}/resources"
+
+# oc executable
+openshift_cli: oc
+
+# The OCP user that will own all resources in the generated OCP namespace
+project_admin: user1
+
+# Name of the OCP project to deploy this application to
+project_name: "{{ project_admin }}-scm"
+
+
+
+
+# The following two options are allowed:
+#   image  : Use if a container image of your application is already available from a public container image repo:  ie:  quay.io , registry.redhat.io or docker hub
+#   source : Use if this ansible includes tasks to deploy a Jenkins or Tekton BuildConfig that creates the application image from source code
+deploy_from: image
+
+kafka_debezium_db_server_name: scm
+kafka_debezium_table_whitelist: public.scm
+
+# Topic that Debezium will stream to and triggers BPM process
+kafka_debezium_topic: "{{ kafka_debezium_db_server_name }}.{{ kafka_debezium_table_whitelist }}"
+
+scm_kafka_file_topic: topic-scm-file
+
+
+namespace_knativeserving: knative-serving
+namespace_knativeeventing: knative-eventing
+
+scm_backend_psql_name: scm-backend-psql
+scm_psql_user_name: scm
+scm_psql_passwd: scm
+scm_psql_db_name: scm
+undeploy_psql_scm: false
+
+scm_frontend_app_name: scm-frontend

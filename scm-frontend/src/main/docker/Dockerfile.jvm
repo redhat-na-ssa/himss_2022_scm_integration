@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.jvm -t quarkus/scm-frontend-jvm .
+# podman build -f src/main/docker/Dockerfile.jvm -t quay.io/redhat_naps_da/himss_2022_scm-frontend-jvm:0.0.1 .
 #
 # Then run the container using:
 #

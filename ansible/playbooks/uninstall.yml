@@ -1,0 +1,18 @@
+---
+
+- name: UnDeploy all HIMSS 2022 artifacts
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  run_once: true
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/kafka_cluster.yml
+  vars:
+    ACTION: uninstall
+
+  tasks:
+  - include: tasks/scm-frontend.yml
+  - include: tasks/scm-backend.yml
+#  - include: tasks/knative.yml
+  - include: tasks/amq-streams.yml

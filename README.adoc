@@ -7,16 +7,127 @@
 = himss_2022_scm_integration
 :numbered:
 
+== Overview
 
-SCM Integration Demo
+TO-DO
 
-== Business Dashboard
+== Technical Discussion Vectors
+
+. *Operations*
+.. Ansible for automated and repeatable deployment of Application Services to OpenShift
+
+. *Events in Motion*
+.. Use of Red Hat AMQ Streams
+.. Visibility of events via KafDrop
+
+. *Polyglot Frameworks*
+.. Quarkus
+.. Camel
+
+. *Monitoring*
+.. Business Dashboards using Grafana's Postgresql driver
+.. Operational Dashboards using Grafana's Prometheus driver
+.. Quarkus micro-profile metrics scraped by Prometheus
+
+
+TO_DO
+
+== Demo Components
+
+The purpose of this section is to highlight the major components of the demo.
+
+TO-DO
+
+=== Grafana Dashboard
 
 . First draft 
 +
 image::docs/images/b_kpis.png[]
 
-== App Metrics
+
+== Deploy to OpenShift using Ansible
+
+Ansible is included to deploy this application to OpenShift in a repeatable manner.
+
+=== Pre-reqs:
+
+. OpenShift Container Platform version 4.7.* or more recent. Resource requirements needed by the app (doesn’t include resource requirements of Openshift to support itself) is as follows:
+
+.. RAM: 6 GB
+
+.. CPU: 8
+
+.. Storage: 10 PVCs of type RWO (no RWX requirement) and each of size 5 GiB
+
+. cluster-admin credentials to this OpenShift cluster are needed
+
+. Corresponding oc utility installed locally
++
+All versions of this utility are available at either of the following:
+
+.. https://access.redhat.com/downloads/content/290
++
+RHN subscription required
+
+.. https://mirror.openshift.com/pub/openshift-v4/clients/ocp/?C=M;O=D
++
+Accessible without a RHN subscription
+
+. ansible installed locally
++
+ie: dnf install ansible
+
+. git installed locally
+
+=== Procedure:
+
+. Using the oc utility that corresponds to the version of OpenShift that you will deploy to, log into the cluster:
++
+-----
+$ oc login <OCP API Server url> -u <cluster-admin userId> -p <passwd>
+-----
+
+. Clone the source code of this project:
++
+-----
+$ git clone https://github.com/redhat-naps-da/himss_2022_scm_integration
+-----
+
+. Change to the ansible directory of this project:
++
+-----
+$ cd ansible
+-----
+
+. Deploy to OpenShift:
++
+-----
+$ ansible-playbook playbooks/install.yml
+-----
+
+.. Deployment should complete in about 10 minutes.
+
+.. Notice the creation of a new OCP namespace where the application resides: _user1-scm_
+
+.. At the completion of the installation, expect to see messages similar to the following:
++
+-----
+PLAY RECAP *******************************************************************************************************************************************************************************************************
+
+    localhost                  : ok=93   changed=27   unreachable=0    failed=0    skipped=16   rescued=0    ignored=0
+
+-----
+
+. Optional: Uninstall from OpenShift:
++
+-----
+$ ansible-playbook playbooks/uninstall.yml
+-----
+
+
+
+== Development
+=== App Metrics
 
 . View microprofile generated metrics in JSON format
 +
