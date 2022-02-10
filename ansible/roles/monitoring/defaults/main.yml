@@ -28,15 +28,16 @@ prometheus_requests_cpu: 50m
 prometheus_requests_memory: 400Mi
 prometheus_limits_cpu: 500m
 prometheus_limits_memory: 1Gi
-prometheus_serviceaccount_template: prometheus-serviceaccount.yml
 prometheus_cr_template: prometheus-cr.yml
-prometheus_cr_name: "{{ project_admin }}-er-monitoring"
+prometheus_cr_name: "{{ project_admin }}-scm-monitoring"
 prometheus_oauth_proxy_secret: prometheus-k8s-proxy
 prometheus_route_template: prometheus-route.yml
 prometheus_route_name: prometheus-route
 prometheus_service_template: prometheus-service.yml
 prometheus_service_name: prometheus-service
 prometheus_tls_secret: prometheus-k8s-tls
+prometheus_serviceaccount_name: prometheus-oauth
+prometheus_serviceaccount_template: prometheus-serviceaccount.yml
 
 grafana_cr_name: grafana
 grafana_cr_template: grafana-cr.yml

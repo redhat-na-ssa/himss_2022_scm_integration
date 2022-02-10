@@ -39,6 +39,21 @@
       r_prometheus_operator_deployment.ansible_module_results.results[0].status.readyReplicas ==
       r_prometheus_operator_deployment.ansible_module_results.results[0].status.replicas
 
+- name: "copy prometheus service account template"
+  template:
+    src: "{{ resources_dir }}/{{ prometheus_serviceaccount_template }}"
+    dest: "{{ work_dir }}/{{ prometheus_serviceaccount_template }}"
+
+- name: "deploy prometheus service account"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ prometheus_serviceaccount_name }}"
+    namespace: "{{ namespace }}"
+    kind: serviceaccount
+    files:
+      - "{{ work_dir }}/{{ prometheus_serviceaccount_template }}"
+
 - name: "define random value for oauth session"
   set_fact:
     prometheus_oauth_session: "{{ lookup('password', '/dev/null chars=ascii_letters length=43') }}"
