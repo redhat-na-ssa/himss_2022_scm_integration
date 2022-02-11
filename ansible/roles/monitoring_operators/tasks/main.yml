@@ -98,6 +98,14 @@
     files:
       - "{{ work_dir }}/{{ prometheus_route_template }}"
 
+- name: copy prometheus-additional.yaml
+  template:
+    src: "{{ resources_dir }}/prometheus-additional.yaml"
+    dest: "{{ work_dir }}/prometheus-additional.yaml"
+
+- name: create secret additional-scrape-configs
+  command: "{{ openshift_cli }} create secret generic additional-scrape-configs --from-file={{ work_dir }}/prometheus-additional.yaml"
+
 - name: "copy prometheus custom resource template"
   template:
     src: "{{ resources_dir }}/{{ prometheus_cr_template }}"
@@ -157,36 +165,6 @@
     type: generic
     from_literal:
       session_secret: "{{ grafana_oauth_session }}"
-
-- name: "copy grafana datasource template"
-  template:
-    src: "{{ resources_dir }}/{{ grafana_datasource_template }}"
-    dest: "{{ work_dir }}/{{ grafana_datasource_template }}"
-
-- name: "deploy grafana datasource"
-  oc_obj:
-    state: present
-    oc_binary: "{{ openshift_cli }}"
-    name: "{{ grafana_datasource_name }}"
-    namespace: "{{ namespace }}"
-    kind: grafanadatasource
-    files:
-      - "{{ work_dir }}/{{ grafana_datasource_template }}" 
-
-- name: "copy grafana custom resource template"
-  template:
-    src: "{{ resources_dir }}/{{ grafana_cr_template }}"
-    dest: "{{ work_dir }}/{{ grafana_cr_template }}"
-
-- name: "deploy grafana cr"
-  oc_obj:
-    state: present
-    oc_binary: "{{ openshift_cli }}"
-    name: "{{ grafana_cr_name }}"
-    namespace: "{{ namespace }}"
-    kind: grafana
-    files:
-      - "{{ work_dir }}/{{ grafana_cr_template }}" 
 
 - name: "create clusterrole for get namespaces"
   oc_obj:

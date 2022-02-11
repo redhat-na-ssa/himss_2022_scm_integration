@@ -12,6 +12,8 @@
     ACTION: uninstall
 
   tasks:
+  - include: tasks/monitoring_apps.yml
+  - include: tasks/monitoring_operators.yml
   - include: tasks/scm-frontend.yml
   - include: tasks/scm-backend.yml
 #  - include: tasks/knative.yml

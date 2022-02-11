@@ -1,0 +1,19 @@
+---
+
+- set_fact:
+    namespace: "{{ project_name }}"
+    resources_dir: "{{ resources_base_dir }}/monitoring_operators"
+    work_dir_name: "monitoring_operators"
+- include_role:
+    name: ../roles/monitoring_operators
+  when: >
+    ACTION is not defined or
+    ACTION is none or
+    ACTION|trim() == "" or
+    ACTION|trim() == "install"
+- include_role:
+    name: ../roles/monitoring_operators
+    tasks_from: uninstall
+  when: >
+    ACTION is defined and
+    ACTION|trim() == "uninstall"

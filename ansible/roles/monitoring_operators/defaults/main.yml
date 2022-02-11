@@ -19,6 +19,7 @@ grafana_operator_subscription_channel: v4
 grafana_operator_subscription_automatic_installplan_approval: false
 grafana_operator_subscription_starting_csv: "grafana-operator.v4.1.1"
 grafana_operator_csv_prefix: grafana-operator
+grafana_oauth_proxy_secret: grafana-k8s-proxy
 
 prometheus_image: quay.io/openshift/origin-prometheus:4.7
 prometheus_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
@@ -29,22 +30,13 @@ prometheus_requests_memory: 400Mi
 prometheus_limits_cpu: 500m
 prometheus_limits_memory: 1Gi
 prometheus_cr_template: prometheus-cr.yml
-prometheus_cr_name: "{{ project_admin }}-scm-monitoring"
+prometheus_cr_name: "prometheus"
 prometheus_oauth_proxy_secret: prometheus-k8s-proxy
 prometheus_route_template: prometheus-route.yml
 prometheus_route_name: prometheus-route
 prometheus_service_template: prometheus-service.yml
-prometheus_service_name: prometheus-service
 prometheus_tls_secret: prometheus-k8s-tls
-prometheus_serviceaccount_name: prometheus-oauth
 prometheus_serviceaccount_template: prometheus-serviceaccount.yml
-
-grafana_cr_name: grafana
-grafana_cr_template: grafana-cr.yml
-grafana_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
-grafana_oauth_proxy_secret: grafana-k8s-proxy
-grafana_datasource_template: grafana-datasource.yml
-grafana_datasource_name: prometheus
 
 clusterrole_get_namespaces_template: get-namespaces-clusterrole.yml
 grafana_cluster_monitoring_view_crb_template: grafana-cluster-monitoring-view-crb.yml

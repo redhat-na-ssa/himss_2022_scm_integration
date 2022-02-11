@@ -1,0 +1,97 @@
+---
+- name: "delete grafana custom resource"
+  oc_obj:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    kind: grafana
+    name: "{{ grafana_cr_name }}"
+    namespace: "{{ namespace }}"
+
+
+- name: "delete Kafka servicemonitor resource"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-kafka
+    namespace: "{{ namespace }}"
+    kind: ServiceMonitor
+
+- name: "delete application servicemonitor resource"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-services
+    namespace: "{{ namespace }}"
+    kind: ServiceMonitor
+
+- name: "delete actuator servicemonitor resource"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-services-actuator
+    namespace: "{{ namespace }}"
+    kind: ServiceMonitor
+
+- name: "delete GrafanaDashboard scm-dashboard"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-dashboard
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDashboard
+
+- name: "delete clusterrole get-namespaces clusterrolebinding for user {{ project_admin}} "
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ project_admin }}-get-namespaces"
+    kind: clusterrolebinding
+
+- name: "delete grafana datasource prometheus-openshift-monitoring"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: prometheus-openshift-monitoring
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDataSource
+
+- name: "delete grafana datasource ds-scm"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: ds-scm
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDataSource
+
+- name: "delete grafana datasource prometheus"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: prometheus
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDataSource
+
+
+- name: "delete grafana dashboard kafka-cluster-dashboard"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: kafka-cluster-dashboard
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDashboard
+
+- name: "delete grafana dashboard kafka-connect-dashboard"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: kafka-connect-dashboard
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDashboard
+
+- name: "delete pod monitor kafka-resources-metrics"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: kafka-resources-metrics
+    namespace: "{{ namespace_monitoring }}"
+    kind: PodMonitor

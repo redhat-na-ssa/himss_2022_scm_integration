@@ -2,17 +2,17 @@
 
 - set_fact:
     namespace: "{{ project_name }}"
-    resources_dir: "{{ resources_base_dir }}/monitoring"
-    work_dir_name: "monitoring"
+    resources_dir: "{{ resources_base_dir }}/monitoring_apps"
+    work_dir_name: "monitoring_apps"
 - include_role:
-    name: ../roles/monitoring
+    name: ../roles/monitoring_apps
   when: >
     ACTION is not defined or
     ACTION is none or
     ACTION|trim() == "" or
     ACTION|trim() == "install"
 - include_role:
-    name: ../roles/monitoring
+    name: ../roles/monitoring_apps
     tasks_from: uninstall
   when: >
     ACTION is defined and

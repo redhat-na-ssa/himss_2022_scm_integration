@@ -45,4 +45,8 @@ scm_frontend_app_name: scm-frontend
 uninstall_cluster_resources: true
 uninstall_delete_project: false
 
+prometheus_serviceaccount_name: prometheus-oauth
 namespace_monitoring: "{{ project_name }}"
+monitoring_label_value: "{{ project_name }}"
+monitoring_label: prometheus
+prometheus_service_name: prometheus-service

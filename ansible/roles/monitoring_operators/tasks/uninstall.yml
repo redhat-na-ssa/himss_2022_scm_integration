@@ -22,22 +22,6 @@
     kind: clusterrole
   when: uninstall_cluster_resources|bool == true
 
-- name: "delete grafana custom resource"
-  oc_obj:
-    oc_binary: "{{ openshift_cli }}"
-    state: absent
-    kind: grafana
-    name: "{{ grafana_cr_name }}"
-    namespace: "{{ namespace }}"
-
-- name: "delete grafana datasource"
-  oc_obj:
-    state: absent
-    oc_binary: "{{ openshift_cli }}"
-    name: "{{ grafana_datasource_name }}"
-    namespace: "{{ namespace }}"
-    kind: grafanadatasource
-
 - name: "delete grafana outh proxy secret"
   oc_secret:
     oc_binary: "{{ openshift_cli }}"
@@ -147,6 +131,22 @@
     subscription_namespace: "{{ namespace }}"
     subscription_name: "{{ prometheus_operator_subscription_name }}"
     csv_prefix: "{{ prometheus_operator_csv_prefix }}"
+
+- name: "delete service account {{ prometheus_serviceaccount_name }}"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ prometheus_serviceaccount_name }}"
+    namespace: "{{ namespace }}"
+    kind: serviceaccount
+
+- name: "delete prometheus secret additional-scrape-configs"
+  oc_secret:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    namespace: "{{ namespace }}"
+    name: additional-scrape-configs
+
 
 - name: "delete project"
   oc_project:

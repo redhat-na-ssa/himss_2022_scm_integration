@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: prometheus
+    monitoring-key: "{{ monitoring_label_value }}"
+  name: scm-services
+spec:
+  endpoints:
+    - interval: 5s
+      port: http
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - '{{ namespace }}'
+  selector:
+    matchLabels:
+      monitoring: {{ monitoring_label }}

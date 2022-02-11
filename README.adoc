@@ -125,6 +125,17 @@ $ ansible-playbook playbooks/uninstall.yml
 -----
 
 
+== Smoke Test
+
+-----
+$ SCM_FRONTEND_HOST=$(oc get route scm-frontend -n user1-scm --template='{{ .spec.host }}')
+$ cd scm-frontend 
+
+$ curl -v -X POST \
+    -F "data=@src/test/himss/good/AM3X-365115-2021285.tgz" \
+    -F "data=@src/test/himss/good/DDAS-365115-2021285.tgz" \
+    https://$SCM_FRONTEND_HOST/gzippedFiles
+-----
 
 == Development
 === App Metrics

@@ -1,0 +1,27 @@
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDataSource
+metadata:
+  name: ds-scm
+spec:
+  datasources:
+    - name: PostgreSQL
+      type: postgres
+      url: {{ scm_backend_psql_name }}.{{ project_name }}:5432
+      database: {{ scm_psql_db_name }}
+      user: {{ scm_psql_user_name }}
+      secureJsonData:
+        password: {{ scm_psql_passwd }}
+      jsonData:
+        sslmode: "disable"
+      editable: true
+      access: "proxy"
+      isDefault: true
+    - name: 'Prometheus'
+      type: 'prometheus'
+      access: 'proxy'
+      org_id: 1
+      url: http://{{ prometheus_service_name }}:9090
+      isDefault: false
+      version: 1
+      editable: true
+  name: datasources.yaml

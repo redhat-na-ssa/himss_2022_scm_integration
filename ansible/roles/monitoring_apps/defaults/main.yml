@@ -1,0 +1,19 @@
+---
+
+monitoring_scm_datasource_template: scm-grafanadatasource.yml
+scm_grafana_dashboard_template: scm-grafanadashboard.yml
+
+prometheus_monitoring_role_template: prometheus-monitoring-role.yml
+prometheus_monitoring_role_name: prometheus-monitoring
+monitoring_kafka_podmonitor_template: kafka-podmonitor.yml
+monitoring_application_servicemonitor_template: scm-application-servicemonitor.yml
+monitoring_actuator_servicemonitor_template: scm-actuator-servicemonitor.yml
+openshift_monitoring_datasource_template: openshift-monitoring-grafanadatasource.yml
+
+kafka_cluster_dashboard_template: kafka-cluster-dashboard.yml
+kafka_connect_dashboard_template: kafka-connect-dashboard.yml
+
+grafana_cr_name: grafana
+grafana_cr_template: grafana-cr.yml
+grafana_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
+

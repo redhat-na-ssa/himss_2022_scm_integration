@@ -1,0 +1,186 @@
+---
+
+- name: "update namespace with monitoring label"
+  oc_label:
+    oc_binary: "{{ openshift_cli }}"
+    state: present
+    kind: namespace
+    name: "{{ namespace }}"
+    labels:
+      - key: monitoring-key
+        value: "{{ monitoring_label_value }}"
+
+- name: "create prometheus monitoring role in {{ namespace }} namespace"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ prometheus_monitoring_role_name }}"
+    namespace: "{{ namespace }}"
+    kind: Role
+    files:
+      - "{{ resources_dir }}/{{ prometheus_monitoring_role_template }}"
+
+- name: "add prometheus monitoring role to prometheus serviceaccount in project {{ namespace }}"
+  oc_adm_policy_user:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    rolebinding_name: prometheus-monitoring
+    namespace: "{{ namespace }}"
+    resource_kind: role
+    role_namespace: "{{ namespace }}"
+    user: "system:serviceaccount:{{ namespace_monitoring }}:{{ prometheus_serviceaccount_name }}"
+    resource_name: "{{ prometheus_monitoring_role_name }}"
+
+- name: "copy Kafka podmonitor template"
+  template:
+    src: "{{ resources_dir }}/{{ monitoring_kafka_podmonitor_template }}"
+    dest: "{{ work_dir }}/{{ monitoring_kafka_podmonitor_template }}"
+
+- name: "create Kafka podmonitor resource"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: kafka-resources-metrics
+    namespace: "{{ namespace_monitoring }}"
+    kind: PodMonitor
+    files:
+      - "{{ work_dir }}/{{ monitoring_kafka_podmonitor_template }}"
+
+- name: "copy application servicemonitor template"
+  template:
+    src: "{{ resources_dir }}/{{ monitoring_application_servicemonitor_template }}"
+    dest: "{{ work_dir }}/{{ monitoring_application_servicemonitor_template }}"
+
+- name: "create application servicemonitor resource"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-services
+    namespace: "{{ namespace_monitoring }}"
+    kind: ServiceMonitor
+    files:
+      - "{{ work_dir }}/{{ monitoring_application_servicemonitor_template }}"
+
+- name: "copy actuator endpoint servicemonitor template"
+  template:
+    src: "{{ resources_dir }}/{{ monitoring_actuator_servicemonitor_template }}"
+    dest: "{{ work_dir }}/{{ monitoring_actuator_servicemonitor_template }}"
+
+- name: "create actuator servicemonitor resource"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-services-actuator
+    namespace: "{{ namespace_monitoring }}"
+    kind: ServiceMonitor
+    files:
+      - "{{ work_dir }}/{{ monitoring_actuator_servicemonitor_template }}"
+
+- name: "copy {{ monitoring_scm_datasource_template }}"
+  template:
+    src: "{{ resources_dir }}/{{ monitoring_scm_datasource_template }}"
+    dest: "{{ work_dir }}/{{ monitoring_scm_datasource_template }}"
+
+- name: "create scm grafana datasource"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: ds-scm
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDataSource
+    files:
+      - "{{ work_dir }}/{{ monitoring_scm_datasource_template }}"
+
+- name: "copy scm grafana dashboard template {{ scm_grafana_dashboard_template }}"
+  template:
+    src: "{{ resources_dir }}/{{ scm_grafana_dashboard_template }}"
+    dest: "{{ work_dir }}/{{ scm_grafana_dashboard_template }}"
+
+- name: "create application grafana dashboard {{ scm_grafana_dashboard_template }}"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: scm-dashboard
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDashboard
+    files:
+      - "{{ work_dir }}/{{ scm_grafana_dashboard_template }}"
+
+- name: "copy kafka connect grafana dashboard template"
+  template:
+    src: "{{ resources_dir }}/{{ kafka_connect_dashboard_template }}"
+    dest: "{{ work_dir }}/{{ kafka_connect_dashboard_template }}"
+  vars:
+    kubernetes_pod_name: !unsafe "{{kubernetes_pod_name}}"
+    connector: !unsafe "{{connector}}"
+
+- name: "create kafka connect grafana dashboard"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: kafka-connect-dashboard
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDashboard
+    files:
+      - "{{ work_dir }}/{{ kafka_connect_dashboard_template }}"
+
+- name: "copy grafana custom resource template"
+  template:
+    src: "{{ resources_dir }}/{{ grafana_cr_template }}"
+    dest: "{{ work_dir }}/{{ grafana_cr_template }}"
+
+- name: "deploy grafana cr"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ grafana_cr_name }}"
+    namespace: "{{ namespace }}"
+    kind: grafana
+    files:
+      - "{{ work_dir }}/{{ grafana_cr_template }}"
+
+- name: "copy kafka cluster grafana dashboard template"
+  template:
+    src: "{{ resources_dir }}/{{ kafka_cluster_dashboard_template }}"
+    dest: "{{ work_dir }}/{{ kafka_cluster_dashboard_template }}"
+  vars:
+    pod: !unsafe "{{pod}}"
+    persistentvolumeclaim: !unsafe "{{persistentvolumeclaim}}"
+    kubernetes_pod_name: !unsafe "{{kubernetes_pod_name}}"
+    listener: !unsafe "{{listener}}"
+    topic: !unsafe "{{topic}}"
+    partition: !unsafe "{{partition}}"
+
+- name: "create kafka cluster grafana dashboard"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: kafka-cluster-dashboard
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDashboard
+    files:
+      - "{{ work_dir }}/{{ kafka_cluster_dashboard_template }}"
+
+
+- name: "obtain token for grafana serviceaccount"
+  shell: |
+    {{ openshift_cli }} sa get-token grafana-serviceaccount -n {{ namespace_monitoring }}
+  register: grafana_sa_token
+
+- name: "copy openshift monitoring grafana datasource template {{ openshift_monitoring_datasource_template }}"
+  template:
+    src: "{{ resources_dir }}/{{ openshift_monitoring_datasource_template }}"
+    dest: "{{ work_dir }}/{{ openshift_monitoring_datasource_template }}"
+  vars:
+    token: "{{ grafana_sa_token.stdout }}"
+
+- name: "create openshift monitoring grafana datasource"
+  oc_obj:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: prometheus-openshift-monitoring
+    namespace: "{{ namespace_monitoring }}"
+    kind: GrafanaDataSource
+    files:
+      - "{{ work_dir }}/{{ openshift_monitoring_datasource_template }}"
+
