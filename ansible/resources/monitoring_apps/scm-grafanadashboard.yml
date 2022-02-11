@@ -892,7 +892,7 @@ spec:
           "targets": [
             {
               "exemplar": true,
-              "expr": "base_memory_usedHeap_bytes / 10^9",
+              "expr": "base_memory_usedHeap_bytes / 10^6",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -902,7 +902,7 @@ spec:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "JVM Heap (GBs)",
+          "title": "JVM Heap (MBs)",
           "tooltip": {
             "shared": true,
             "sort": 0,

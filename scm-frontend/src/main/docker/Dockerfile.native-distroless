@@ -7,11 +7,11 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.native-distroless -t quarkus/scm-frontend .
+# docker build -f src/main/docker/Dockerfile.native-distroless -t quay.io/redhat_naps_da/himss_2022_scm-frontend-native:0.0.1 .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/scm-frontend
+# docker run -i --rm -p 8080:8080 quay.io/redhat_naps_da/himss_2022_scm-frontend-native:0.0.1
 #
 ###
 FROM quay.io/quarkus/quarkus-distroless-image:1.0

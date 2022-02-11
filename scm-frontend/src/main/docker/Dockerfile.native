@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.native -t quarkus/scm-frontend .
+# docker build -f src/main/docker/Dockerfile.native -t quay.io/redhat_naps_da/himss_2022_scm-frontend-native:0.0.2 .
 #
 # Then run the container using:
 #
