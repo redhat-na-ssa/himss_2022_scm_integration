@@ -8,7 +8,7 @@
     name: "{{ namespace }}"
     labels:
       - key: monitoring-key
-        value: "{{ monitoring_label_value }}"
+        value: "{{ grafana_label_value }}"
 
 - name: "create prometheus monitoring role in {{ namespace }} namespace"
   oc_obj:

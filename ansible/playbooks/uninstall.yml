@@ -18,3 +18,10 @@
   - include: tasks/scm-backend.yml
 #  - include: tasks/knative.yml
   - include: tasks/amq-streams.yml
+
+  - name: "delete project"
+    oc_project:
+      oc_binary: "{{ openshift_cli }}"
+      state: absent
+      name: "{{ namespace }}"
+    when: delete_project|bool == true

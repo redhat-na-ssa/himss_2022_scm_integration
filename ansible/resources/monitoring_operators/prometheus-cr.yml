@@ -6,10 +6,17 @@ metadata:
     prometheus: '{{ prometheus_cr_name }}'
   name: '{{ prometheus_cr_name }}'
 spec:
-  image: '{{ prometheus_image }}'
+
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md#expose-the-prometheus-admin-api
+  enableAdminAPI: true
+
+  # Prometheus Scrape Configs
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/additional-scrape-config.md
   additionalScrapeConfigs:
     key: prometheus-additional.yaml
     name: additional-scrape-configs
+
+  replicas: 1
   containers:
   - args:
     - -provider=openshift

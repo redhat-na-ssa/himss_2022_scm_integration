@@ -146,11 +146,3 @@
     state: absent
     namespace: "{{ namespace }}"
     name: additional-scrape-configs
-
-
-- name: "delete project"
-  oc_project:
-    oc_binary: "{{ openshift_cli }}"
-    state: absent
-    name: "{{ namespace }}"
-  when: uninstall_delete_project|bool == true

@@ -3,7 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: kafka-connect-dashboard
   labels:
-    monitoring-key: "{{ monitoring_label_value }}"
+    monitoring-key: "{{ grafana_label_value }}"
 spec:
   json: |
     {

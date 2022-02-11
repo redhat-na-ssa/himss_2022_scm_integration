@@ -128,7 +128,7 @@ $ ansible-playbook playbooks/uninstall.yml
 == Smoke Test
 
 -----
-$ SCM_FRONTEND_HOST=$(oc get route scm-frontend -n user1-scm --template='{{ .spec.host }}')
+$ SCM_FRONTEND_HOST=$(oc get route scm-frontend -n user1-himss2022-scm --template='{{ .spec.host }}')
 $ cd scm-frontend 
 
 $ curl -v -X POST \

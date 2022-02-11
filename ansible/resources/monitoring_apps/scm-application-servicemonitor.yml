@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   labels:
     k8s-app: prometheus
-    monitoring-key: "{{ monitoring_label_value }}"
+    monitoring-key: "{{ grafana_label_value }}"
   name: scm-services
 spec:
   endpoints:
@@ -15,4 +15,4 @@ spec:
       - '{{ namespace }}'
   selector:
     matchLabels:
-      monitoring: {{ monitoring_label }}
+      monitoring: {{ prometheus_ServiceMonitor_label }}

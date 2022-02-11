@@ -1,5 +1,7 @@
 ---
 
+
+#######       Prometheus operator and CR      ###################
 - name: "create operatorgroup in {{ namespace }}"
   import_role:
     name: ../roles/operatorgroup
@@ -105,6 +107,8 @@
 
 - name: create secret additional-scrape-configs
   command: "{{ openshift_cli }} create secret generic additional-scrape-configs --from-file={{ work_dir }}/prometheus-additional.yaml"
+  ignore_errors: yes
+
 
 - name: "copy prometheus custom resource template"
   template:
@@ -121,6 +125,13 @@
     files:
       - "{{ work_dir }}/{{ prometheus_cr_template }}"   
 
+#################################################################
+
+
+
+
+
+#######       Grafana operator and CR      ###################
 - name: "deploy grafana operator in {{ namespace }}"
   import_role:
     name: ../roles/operator_olm

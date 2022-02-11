@@ -10,19 +10,7 @@ prometheus_operator_subscription_automatic_installplan_approval: false
 prometheus_operator_subscription_starting_csv: "prometheusoperator.0.47.0"
 prometheus_operator_csv_prefix: prometheusoperator
 
-# grafana operator
-grafana_operator_subscription_template: subscription.yml
-grafana_operator_packagemanifest: grafana-operator
-grafana_operator_deployment_name: grafana-operator-controller-manager
-grafana_operator_subscription_name: grafana-operator
-grafana_operator_subscription_channel: v4
-grafana_operator_subscription_automatic_installplan_approval: false
-grafana_operator_subscription_starting_csv: "grafana-operator.v4.1.1"
-grafana_operator_csv_prefix: grafana-operator
-grafana_oauth_proxy_secret: grafana-k8s-proxy
-
-prometheus_image: quay.io/openshift/origin-prometheus:4.7
-prometheus_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
+# prometheus custom resource
 prometheus_storage_request: 10Gi
 prometheus_retention: 45d
 prometheus_requests_cpu: 50m
@@ -37,6 +25,20 @@ prometheus_route_name: prometheus-route
 prometheus_service_template: prometheus-service.yml
 prometheus_tls_secret: prometheus-k8s-tls
 prometheus_serviceaccount_template: prometheus-serviceaccount.yml
+prometheus_auth_proxy_image: quay.io/openshift/origin-oauth-proxy:4.7
 
+
+# grafana operator
+grafana_operator_subscription_template: subscription.yml
+grafana_operator_packagemanifest: grafana-operator
+grafana_operator_deployment_name: grafana-operator-controller-manager
+grafana_operator_subscription_name: grafana-operator
+grafana_operator_subscription_channel: v4
+grafana_operator_subscription_automatic_installplan_approval: false
+grafana_operator_subscription_starting_csv: "grafana-operator.v4.1.1"
+grafana_operator_csv_prefix: grafana-operator
+grafana_oauth_proxy_secret: grafana-k8s-proxy
+
+# grafana CR
 clusterrole_get_namespaces_template: get-namespaces-clusterrole.yml
 grafana_cluster_monitoring_view_crb_template: grafana-cluster-monitoring-view-crb.yml
