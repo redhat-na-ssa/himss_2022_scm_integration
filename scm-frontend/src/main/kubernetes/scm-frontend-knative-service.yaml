@@ -1,0 +1,198 @@
+# oc get routes.serving.knative.dev -n user1-himss2022-scm 
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: scm-frontend
+  labels:
+    app.kubernetes.io/component: scm-frontend
+    app.kubernetes.io/instance: scm-frontend
+    app.kubernetes.io/name: scm-frontend
+    app.openshift.io/runtime: camel
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '10'
+        autoscaling.knative.dev/minScale: '1'
+        autoscaling.knative.dev/target: '1' # this means a target of max concurrent request, to reduce autoscale freq, increase number
+        #10 concurrent requests will scale up to 10 pods
+      labels:
+        app.kubernetes.io/component: scm-frontend
+        app.kubernetes.io/instance: scm-frontend
+        app.kubernetes.io/name: scm-frontend
+        app.openshift.io/runtime: camel
+    spec:
+      containerConcurrency: 10
+      containers:
+        - resources:
+            limits:
+              cpu: 1500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 250Mi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 0
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: scm-frontend
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 0
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 3
+          env:
+            - name: JAVA_OPTIONS
+              value: >-
+                -Dquarkus.config.locations=/deployments/config
+                -Dvertx.metrics.options.enabled=true
+                -Dvertx.metrics.options.registryName=prometheus
+            - name: AB_JOLOKIA_OFF
+              value: 'true'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /deployments/config
+              name: config
+              readOnly: true
+          image: >-
+            quay.io/redhat_naps_da/himss_2022_scm-frontend-jvm@sha256:d43e631b77f8c91502a053097807bcdca4b451cc78da2b68583fc32ad9fb82f0
+      enableServiceLinks: false
+      timeoutSeconds: 300
+      volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: application.properties
+                path: application.properties
+            name: scm-frontend
+          name: config
+  traffic:
+    - latestRevision: true
+      percent: 100
+# ---
+# kind: DeploymentConfig
+# apiVersion: apps.openshift.io/v1
+# metadata:
+#   name: scm-frontend
+#   labels:
+#     app: scm-frontend
+# spec:
+#   strategy:
+#     type: Rolling
+#     resources: {}
+#     activeDeadlineSeconds: 21600
+#     rollingParams:
+#       timeoutSeconds: 3600
+#       updatePeriodSeconds: 1
+#       intervalSeconds: 1
+#       maxSurge: 25%
+#       maxUnavailable: 25%
+#   triggers:
+#     - type: ImageChange
+#       imageChangeParams:
+#         automatic: true
+#         containerNames:
+#           - scm-frontend
+#         from:
+#           kind: ImageStreamTag
+#           name: 'scm-frontend:0.0.1'
+#           namespace: user1-himss2022-scm
+#     - type: ConfigChange
+#   replicas: 1
+#   test: false
+#   selector:
+#     app: scm-frontend
+#     group: scm
+#   template:
+#     metadata:
+#       labels:
+#         app: scm-frontend
+#         group: scm
+#     spec:
+#       restartPolicy: Always
+#       serviceAccountName: scm-frontend
+#       schedulerName: default-scheduler
+#       terminationGracePeriodSeconds: 30
+#       securityContext: {}
+#       containers:
+#         - resources:
+#             limits:
+#               cpu: 1500m
+#               memory: 1Gi
+#             requests:
+#               cpu: 250m
+#               memory: 250Mi
+#           readinessProbe:
+#             httpGet:
+#               path: /q/health/ready
+#               port: 8080
+#               scheme: HTTP
+#             initialDelaySeconds: 30
+#             timeoutSeconds: 3
+#             periodSeconds: 30
+#             successThreshold: 1
+#             failureThreshold: 3
+#           terminationMessagePath: /dev/termination-log
+#           name: scm-frontend
+#           livenessProbe:
+#             httpGet:
+#               path: /q/health/live
+#               port: 8080
+#               scheme: HTTP
+#             initialDelaySeconds: 30
+#             timeoutSeconds: 3
+#             periodSeconds: 30
+#             successThreshold: 1
+#             failureThreshold: 3
+#           env:
+#             - name: KUBERNETES_NAMESPACE
+#               valueFrom:
+#                 fieldRef:
+#                   apiVersion: v1
+#                   fieldPath: metadata.namespace
+#             - name: JAVA_OPTIONS
+#               value: >
+#                 -Dquarkus.config.locations=/deployments/config
+#                 -Dvertx.metrics.options.enabled=true
+#                 -Dvertx.metrics.options.registryName=prometheus
+#             - name: AB_JOLOKIA_OFF
+#               value: 'true'
+#           securityContext:
+#             privileged: false
+#           ports:
+#             - name: prometheus
+#               containerPort: 9779
+#               protocol: TCP
+#           imagePullPolicy: IfNotPresent
+#           volumeMounts:
+#             - name: config
+#               mountPath: /deployments/config
+#           terminationMessagePolicy: File
+#           image: >-
+#             quay.io/redhat_naps_da/himss_2022_scm-frontend-jvm@sha256:d43e631b77f8c91502a053097807bcdca4b451cc78da2b68583fc32ad9fb82f0
+#       serviceAccount: scm-frontend
+#       volumes:
+#         - name: config
+#           configMap:
+#             name: scm-frontend
+#             items:
+#               - key: application.properties
+#                 path: application.properties
+#             defaultMode: 420
+#       dnsPolicy: ClusterFirst
+#       imagePullSecrets: []

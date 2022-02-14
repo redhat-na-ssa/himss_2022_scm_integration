@@ -2,13 +2,14 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: kafka-scaledobject
+  name: scm-bacnkend-kafka-scaledobject
 spec:
   pollingInterval: 5
+  minReplicaCount: 1
   scaleTargetRef:
     # the target has to be a deployment not a deploymentconfig
     name: scm-backend
-    minReplicaCount: 1 # default is zero
+    # default is zero
   triggers:
     - metadata:
         # sed/change namepsace

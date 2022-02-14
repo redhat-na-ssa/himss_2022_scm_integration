@@ -6,13 +6,13 @@ metadata:
     deployment.kubernetes.io/revision: '6'
     image.openshift.io/triggers: >-
       [{"from":{"kind":"ImageStreamTag","name":"scm-backend:0.0.2","namespace":"user1-himss2022-scm"},"fieldPath":"spec.template.spec.containers[?(@.name==\"scm-backend\")].image","pause":"false"}]
-    openshift.io/generated-by: Opme: scm-backend
+    name: scm-backend
   labels:
     app: scm-backend
     app.kubernetes.io/component: scm-backend
     app.kubernetes.io/instance: scm-backend
     app.kubernetes.io/name: scm-backend
-    app.openshift.io/runtime: quarkus
+    app.openshift.io/runtime: camel
     app.openshift.io/runtime-version: 0.0.2
 spec:
   replicas: 1
