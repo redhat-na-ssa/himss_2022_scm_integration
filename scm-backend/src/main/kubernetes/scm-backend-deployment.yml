@@ -1,0 +1,98 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  annotations:
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    deployment.kubernetes.io/revision: '6'
+    image.openshift.io/triggers: >-
+      [{"from":{"kind":"ImageStreamTag","name":"scm-backend:0.0.2","namespace":"user1-himss2022-scm"},"fieldPath":"spec.template.spec.containers[?(@.name==\"scm-backend\")].image","pause":"false"}]
+    openshift.io/generated-by: Opme: scm-backend
+  labels:
+    app: scm-backend
+    app.kubernetes.io/component: scm-backend
+    app.kubernetes.io/instance: scm-backend
+    app.kubernetes.io/name: scm-backend
+    app.openshift.io/runtime: quarkus
+    app.openshift.io/runtime-version: 0.0.2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scm-backend
+  template:
+    metadata:
+      labels:
+        app: scm-backend
+        deploymentconfig: scm-backend
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: scm-backend
+            items:
+              - key: application.properties
+                path: application.properties
+            defaultMode: 420
+      containers:
+        - resources:
+            limits:
+              cpu: 1500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 250Mi
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: scm-backend
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: JAVA_OPTIONS
+              value: >-
+                -Dvertx.metrics.options.enabled=true
+                -Dvertx.metrics.options.registryName=prometheus
+            - name: AB_JOLOKIA_OFF
+              value: 'true'
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+            - name: prometheus
+              containerPort: 9779
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              mountPath: /deployments/config
+          terminationMessagePolicy: File
+          image: >-
+            quay.io/redhat_naps_da/himss_2022_scm-backend-jvm@sha256:0bd900fdc171e7a754403d6bcd8c528bfb51795c29ba0e7384e121f763fdc388
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+      imagePullSecrets: []

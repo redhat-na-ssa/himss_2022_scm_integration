@@ -22,107 +22,202 @@ items:
       app: {{ application_name }}
     sessionAffinity: None
     type: ClusterIP
-- apiVersion: apps.openshift.io/v1
-  kind: DeploymentConfig
+# - apiVersion: apps.openshift.io/v1
+#   kind: DeploymentConfig
+#   metadata:
+#     labels:
+#       app: {{ application_name }}
+#     name: {{ application_name }}
+#   spec:
+#     replicas: 1
+#     revisionHistoryLimit: 2
+#     selector:
+#       group: scm
+#       app: {{ application_name }}
+#     strategy:
+#       activeDeadlineSeconds: 21600
+#       resources: {}
+#       rollingParams:
+#         intervalSeconds: 1
+#         maxSurge: 25%
+#         maxUnavailable: 25%
+#         timeoutSeconds: 3600
+#         updatePeriodSeconds: 1
+#       type: Rolling
+#     template:
+#       metadata:
+#         labels:
+#           group: scm
+#           app: {{ application_name }}
+#       spec:
+#         containers:
+#           - env:
+#             - name: KUBERNETES_NAMESPACE
+#               valueFrom:
+#                 fieldRef:
+#                   apiVersion: v1
+#                   fieldPath: metadata.namespace
+#             - name: JAVA_OPTIONS
+#               value: >
+#                 -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus
+#             - name: AB_JOLOKIA_OFF
+#               value: 'true'
+#             imagePullPolicy: IfNotPresent
+#             name: {{ application_name }}
+#             ports:
+#               - containerPort: 9779
+#                 name: prometheus
+#                 protocol: TCP
+#             livenessProbe:
+#               failureThreshold: 3
+#               httpGet:
+#                 path: /q/health/live
+#                 port: 8080
+#                 scheme: HTTP
+#               initialDelaySeconds: 30
+#               periodSeconds: 30
+#               timeoutSeconds: 3
+#             readinessProbe:
+#               failureThreshold: 3
+#               httpGet:
+#                 path: /q/health/ready
+#                 port: 8080
+#                 scheme: HTTP
+#               initialDelaySeconds: 30
+#               periodSeconds: 30
+#               timeoutSeconds: 3
+#             resources:
+#               limits:
+#                 cpu: '1500m'
+#                 memory: '1Gi'
+#               requests:
+#                 cpu: '250m'
+#                 memory: '250Mi'
+#             securityContext:
+#               privileged: false
+#             terminationMessagePath: /dev/termination-log
+#             terminationMessagePolicy: File
+#             volumeMounts:
+#             - mountPath: /deployments/config
+#               name: config
+#         dnsPolicy: ClusterFirst
+#         restartPolicy: Always
+#         schedulerName: default-scheduler
+#         securityContext: {}
+#         serviceAccount: {{ application_name }}
+#         serviceAccountName: {{ application_name }}
+#         terminationGracePeriodSeconds: 30
+#         volumes:
+#         - configMap:
+#             defaultMode: 420
+#             items:
+#               - key: {{ application_configmap_key }}
+#                 path: {{ application_configmap_key }}
+#             name: {{ application_configmap }}
+#           name: config
+#     triggers:
+#       - type: ConfigChange
+#       - imageChangeParams:
+#           automatic: true
+#           containerNames:
+#             - {{ application_name }}
+#           from:
+#             kind: ImageStreamTag
+#             name: "{{ application_name }}:{{ service_image_tag }}"
+#         type: ImageChange
+- apiVersion: apps/v1      
+  kind: Deployment
   metadata:
+    annotations:
+      alpha.image.policy.openshift.io/resolve-names: '*'
+      image.openshift.io/triggers: >-
+        [{"from":{"kind":"ImageStreamTag","name":"{{ application_name }}:0.0.2","namespace":"{{ project_name }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"{{ application_name }}\")].image","pause":"false"}]
+      openshift.io/generated-by: OpenShiftWebConsole
+    name: {{ application_name }}
     labels:
       app: {{ application_name }}
-    name: {{ application_name }}
+      app.kubernetes.io/component: {{ application_name }}
+      app.kubernetes.io/instance: {{ application_name }}
+      app.kubernetes.io/name: {{ application_name }}
+      app.openshift.io/runtime: quarkus
+      app.openshift.io/runtime-version: 0.0.2
   spec:
     replicas: 1
-    revisionHistoryLimit: 2
     selector:
-      group: scm
-      app: {{ application_name }}
-    strategy:
-      activeDeadlineSeconds: 21600
-      resources: {}
-      rollingParams:
-        intervalSeconds: 1
-        maxSurge: 25%
-        maxUnavailable: 25%
-        timeoutSeconds: 3600
-        updatePeriodSeconds: 1
-      type: Rolling
+      matchLabels:
+        app: {{ application_name }}
     template:
       metadata:
         labels:
-          group: scm
           app: {{ application_name }}
+          deploymentconfig: {{ application_name }}
       spec:
+        volumes:
+          - name: config
+            configMap:
+              name: {{ application_configmap }}
+              items:
+                - key: {{ application_configmap_key }}
+                  path: {{ application_configmap_key }}
+              defaultMode: 420
         containers:
-          - env:
-            - name: KUBERNETES_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: JAVA_OPTIONS
-              value: >
-                -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus
-            - name: AB_JOLOKIA_OFF
-              value: 'true'
-            imagePullPolicy: IfNotPresent
-            name: {{ application_name }}
-            ports:
-              - containerPort: 9779
-                name: prometheus
-                protocol: TCP
-            livenessProbe:
-              failureThreshold: 3
-              httpGet:
-                path: /q/health/live
-                port: 8080
-                scheme: HTTP
-              initialDelaySeconds: 30
-              periodSeconds: 30
-              timeoutSeconds: 3
+          - resources:
+              limits:
+                cpu: 1500m
+                memory: 1Gi
+              requests:
+                cpu: 250m
+                memory: 250Mi
             readinessProbe:
-              failureThreshold: 3
               httpGet:
                 path: /q/health/ready
                 port: 8080
                 scheme: HTTP
               initialDelaySeconds: 30
-              periodSeconds: 30
               timeoutSeconds: 3
-            resources:
-              limits:
-                cpu: '1500m'
-                memory: '1Gi'
-              requests:
-                cpu: '250m'
-                memory: '250Mi'
-            securityContext:
-              privileged: false
+              periodSeconds: 30
+              failureThreshold: 3
             terminationMessagePath: /dev/termination-log
-            terminationMessagePolicy: File
+            name: {{ application_name }}
+            livenessProbe:
+              httpGet:
+                path: /q/health/live
+                port: 8080
+                scheme: HTTP
+              initialDelaySeconds: 30
+              timeoutSeconds: 3
+              periodSeconds: 30
+              failureThreshold: 3
+            env:
+              - name: JAVA_OPTIONS
+                value: >-
+                  -Dvertx.metrics.options.enabled=true
+                  -Dvertx.metrics.options.registryName=prometheus
+              - name: AB_JOLOKIA_OFF
+                value: 'true'
+              - name: KUBERNETES_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.namespace
+            ports:
+              - containerPort: 8080
+                protocol: TCP
+              - containerPort: 8443
+                protocol: TCP
+              - name: prometheus
+                containerPort: 9779
+                protocol: TCP
+            imagePullPolicy: IfNotPresent
             volumeMounts:
-            - mountPath: /deployments/config
-              name: config
-        dnsPolicy: ClusterFirst
+              - name: config
+                mountPath: /deployments/config
+            terminationMessagePolicy: File
+            image: >-
+              quay.io/redhat_naps_da/himss_2022_scm-backend-jvm@sha256:0bd900fdc171e7a754403d6bcd8c528bfb51795c29ba0e7384e121f763fdc388
         restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        serviceAccount: {{ application_name }}
-        serviceAccountName: {{ application_name }}
         terminationGracePeriodSeconds: 30
-        volumes:
-        - configMap:
-            defaultMode: 420
-            items:
-              - key: {{ application_configmap_key }}
-                path: {{ application_configmap_key }}
-            name: {{ application_configmap }}
-          name: config
-    triggers:
-      - type: ConfigChange
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-            - {{ application_name }}
-          from:
-            kind: ImageStreamTag
-            name: "{{ application_name }}:{{ service_image_tag }}"
-        type: ImageChange
-
+        dnsPolicy: ClusterFirst
+        securityContext: {}
+        schedulerName: default-scheduler
+        imagePullSecrets: []

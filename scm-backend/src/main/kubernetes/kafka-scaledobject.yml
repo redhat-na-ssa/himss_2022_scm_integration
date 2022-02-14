@@ -1,0 +1,23 @@
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: kafka-scaledobject
+spec:
+  pollingInterval: 5
+  scaleTargetRef:
+    # the target has to be a deployment not a deploymentconfig
+    name: scm-backend
+    minReplicaCount: 1 # default is zero
+  triggers:
+    - metadata:
+        # sed/change namepsace
+        bootstrapServers: 'kafka-cluster-kafka-bootstrap.user1-himss2022-scm.svc:9092'
+        consumerGroup: scm
+        lagThreshold: '50'
+        # number of pods appears to be roughly lagthreshold/pollinginterval
+        # well at least with this setting it sill load 10 pods
+        offsetResetPolicy: latest
+        topic: topic-scm-file
+      type: kafka
+#spec; https://keda.sh/docs/1.4/concepts/scaling-deployments/
