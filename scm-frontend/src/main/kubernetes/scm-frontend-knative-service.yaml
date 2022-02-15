@@ -1,4 +1,4 @@
-# oc get routes.serving.knative.dev -n user1-himss2022-scm 
+# oc get routes.serving.knative.dev scm-frontend -n user1-himss2022-scm 
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
