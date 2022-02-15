@@ -18,12 +18,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
+      group: scm
       app: scm-backend
   template:
     metadata:
       labels:
         app: scm-backend
-        deploymentconfig: scm-backend
+        group: scm
     spec:
       volumes:
         - name: config

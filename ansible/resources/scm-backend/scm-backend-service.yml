@@ -144,13 +144,14 @@ items:
   spec:
     replicas: 1
     selector:
-      matchLabels:
+      matchLabels: 
+        group: scm
         app: {{ application_name }}
     template:
       metadata:
         labels:
+          group: scm
           app: {{ application_name }}
-          deploymentconfig: {{ application_name }}
       spec:
         volumes:
           - name: config
