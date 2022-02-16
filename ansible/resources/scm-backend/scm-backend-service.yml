@@ -22,6 +22,7 @@ items:
       app: {{ application_name }}
     sessionAffinity: None
     type: ClusterIP
+#commenting out for now DC -> Deployment
 # - apiVersion: apps.openshift.io/v1
 #   kind: DeploymentConfig
 #   metadata:
@@ -131,8 +132,7 @@ items:
     annotations:
       alpha.image.policy.openshift.io/resolve-names: '*'
       image.openshift.io/triggers: >-
-        [{"from":{"kind":"ImageStreamTag","name":"{{ application_name }}:0.0.2","namespace":"{{ project_name }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"{{ application_name }}\")].image","pause":"false"}]
-      openshift.io/generated-by: OpenShiftWebConsole
+        [{"from":{"kind":"ImageStreamTag","name":"{{ application_name }}:{{ service_image_tag }}","namespace":"{{ project_name }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"{{ application_name }}\")].image","pause":"false"}]
     name: {{ application_name }}
     labels:
       app: {{ application_name }}
@@ -215,10 +215,39 @@ items:
                 mountPath: /deployments/config
             terminationMessagePolicy: File
             image: >-
-              quay.io/redhat_naps_da/himss_2022_scm-backend-jvm@sha256:0bd900fdc171e7a754403d6bcd8c528bfb51795c29ba0e7384e121f763fdc388
+             {{ service_image }}:{{ service_image_tag }}
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         dnsPolicy: ClusterFirst
         securityContext: {}
         schedulerName: default-scheduler
         imagePullSecrets: []
+
+# KEDA scaledObject
+# will fail if KEDA Operator and KedaController not installed
+#maybe add a flag for installing KEDA?
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ application_name }}
+  labels:
+    app: {{ application_name }}
+spec:
+  pollingInterval: 5
+  minReplicaCount: 1
+  scaleTargetRef:
+    # the target has to be a deployment not a deploymentconfig
+    name: '{{ application_name }}'
+    # default is zero
+  triggers:
+    - metadata:
+        # sed/change namepsace
+        bootstrapServers: '{{ kafka_bootstrap_address }}'
+        consumerGroup: scm
+        lagThreshold: '50'
+        # number of pods appears to be roughly lagthreshold/pollinginterval
+        # well at least with this setting it sill load 10 pods
+        offsetResetPolicy: latest
+        topic: '{{ scm_kafka_file_topic }}'
+      type: kafka

@@ -6,7 +6,9 @@
     state: absent
     name: "{{ application_name }}"
     namespace: "{{ namespace }}"
-    kind: dc
+    #commenting out for now DC -> Deployment
+    #kind: dc
+    kind: deployment
 
 - name: delete service
   oc_obj:
@@ -83,3 +85,11 @@
     namespace: "{{ namespace }}"
   when: undeploy_psql_scm is defined and undeploy_psql_scm == "true"
 
+#uncomment when  we add KEDA scaling
+- name: delete KEDA scaled object
+  oc_obj:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    name: "{{ application_name }}"
+    namespace: "{{ namespace }}"
+    kind: scaledobjects.keda.sh

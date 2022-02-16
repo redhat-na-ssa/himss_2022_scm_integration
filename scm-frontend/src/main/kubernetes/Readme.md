@@ -1,2 +1,2 @@
 ## Prerequisites
-Install OpenShift Serverless version >= 1.19 - Knative Serving before deploying scm-frontend-knative-service.yaml
+Install OpenShift Serverless version >= 1.19 - Knative Serving before deploying the KNative service defined in`scm-frontend-knative-service.yaml`

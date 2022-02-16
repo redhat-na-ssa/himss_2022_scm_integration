@@ -29,7 +29,9 @@
     state: list
     namespace: "{{ namespace }}"
     name: "{{ application_name }}"
-    kind: dc
+    #commenting out for now DC -> Deployment
+    # kind: dc
+    kind: deployment
   register: result
 
 - name: deploy {{ application_name }} application
@@ -42,7 +44,9 @@
   when: result.ansible_module_results.stderr is defined and result.ansible_module_results.stderr != ""
 
 - name: "wait until {{ application_name }} application is up and running"
-  shell: "{{ openshift_cli }} get dc {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
+#commenting out for now DC -> Deployment
+  #shell: "{{ openshift_cli }} get dc {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
+  shell: "{{ openshift_cli }} get deployment {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
   vars:
     json_template: '\{\{.status.readyReplicas\}\}'
   register: result
