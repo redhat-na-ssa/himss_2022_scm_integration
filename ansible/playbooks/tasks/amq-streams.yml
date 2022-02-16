@@ -1,6 +1,6 @@
 ---
 
-1)  AMQ Streams Operator
+# 1)  AMQ Streams Operator
 - set_fact:
     namespace: "{{ project_name }}"
     work_dir_name: "amq-streams-operator"
@@ -18,7 +18,7 @@
     ACTION is defined and
     ACTION|trim() == "uninstall"
 
-2) AMQ Streams Kafka cluster
+# # 2) AMQ Streams Kafka cluster
 - set_fact:
     namespace: "{{ project_name }}"
     resources_dir: "{{ resources_base_dir }}/amq-streams"
@@ -37,7 +37,7 @@
     ACTION is defined and
     ACTION|trim() == "uninstall"
 
-3) AMQ Streams Topics
+# 3) AMQ Streams Topics
 - set_fact:
     namespace: "{{ project_name }}"
     work_dir_name: "kafka_topics"
