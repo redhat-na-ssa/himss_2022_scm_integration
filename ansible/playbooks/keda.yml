@@ -1,0 +1,15 @@
+---
+
+- name: Deploy KEDA
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  run_once: true
+  vars_files:
+    - group_vars/all.yml
+  # vars:
+  #   ACTION: install
+  #   #ACTION: uninstall
+
+  tasks:
+    - include: tasks/keda.yml

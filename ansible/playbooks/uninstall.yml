@@ -16,6 +16,7 @@
   - include: tasks/monitoring_operators.yml
   - include: tasks/scm-frontend.yml
   - include: tasks/scm-backend.yml
+  - include: tasks/keda.yml
 #  - include: tasks/knative.yml
   - include: tasks/amq-streams.yml
 

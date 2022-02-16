@@ -1,0 +1,10 @@
+apiVersion: keda.sh/v1alpha1
+kind: KedaController
+metadata:
+  namespace: {{ namespace }}
+  name: {{ keda_controller_name }} 
+spec:
+  logLevel: info
+  logLevelMetrics: '0'
+  watchNamespace: ''
+  logEncoder: console

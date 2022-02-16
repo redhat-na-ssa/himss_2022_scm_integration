@@ -76,3 +76,8 @@ namespace_knativeserving: knative-serving
 namespace_knativeeventing: knative-eventing
 ##########################################
 
+
+####### KEDA ##############
+keda_namepsace: keda
+###########################
+

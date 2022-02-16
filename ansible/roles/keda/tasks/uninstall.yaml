@@ -1,0 +1,18 @@
+
+#delete KedaController
+
+- name: "delete keda operator in {{ namespace }}"
+  import_role:
+    name: ../roles/operator_olm
+    tasks_from: uninstall
+  vars:
+    operator_name: keda-operator
+    subscription_namespace: "{{ namespace }}"
+    subscription_name: "{{ keda_operator_subscription_name }}"
+    csv_prefix: "{{ keda_operator_csv_prefix }}"
+
+- name: "delete project {{ namespace }}"
+  oc_project:
+    oc_binary: "{{ openshift_cli }}"
+    state: absent
+    name: "{{ namespace }}"

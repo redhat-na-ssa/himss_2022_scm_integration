@@ -1,0 +1,52 @@
+---
+# tasks file for keda
+
+# create keda namespace
+- name: create project {{ namespace }}
+  oc_project:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ namespace }}"
+
+- name: "create operatorgroup in {{ namespace }}"
+  import_role:
+    name: ../roles/operatorgroup
+  vars:
+    operatorgroup_name: "{{ namespace }}"
+    operatorgroup_namespace: "{{ namespace }}"
+    # operatorgroup_target_namespace: "{{ namespace }}"
+
+- name: "deploy keda operator in {{ namespace }}"
+  import_role:
+    name: ../roles/operator_olm
+  vars:
+    operator_name: keda-operator
+    packagemanifest: "{{ keda_operator_packagemanifest }}"
+    subscription_channel: "{{ keda_operator_subscription_channel }}"
+    subscription_namespace: "{{ namespace }}"
+    subscription_name: "{{ keda_operator_subscription_name }}"
+    automatic_installplan_approval: "{{ keda_operator_subscription_automatic_installplan_approval }}"
+    subscription_starting_csv: "{{ keda_operator_subscription_starting_csv }}"
+    subscription_catalog_source: "{{ keda_operator_subscription_catalog_source}}"
+    subscription_catalog_source_namespace: "{{ keda_operator_subscription_catalog_source_namespace }}"
+    csv_prefix: "{{ keda_operator_csv_prefix }}"
+
+- name: "wait until keda operator is active in {{ namespace }}"
+  oc_obj:
+    state: list
+    oc_binary: "{{ openshift_cli }}"
+    kind: Deployment
+    name: "{{ keda_operator_deployment_name }}"
+    namespace: "{{ namespace }}"
+  register: r_keda_operator_deployment
+  retries: 30
+  delay: 10
+  changed_when: false
+  until:
+    - r_keda_operator_deployment.ansible_module_results.results[0].status.readyReplicas is defined
+    - r_keda_operator_deployment.ansible_module_results.results[0].status.replicas is defined
+    - >-
+      r_keda_operator_deployment.ansible_module_results.results[0].status.readyReplicas ==
+      r_keda_operator_deployment.ansible_module_results.results[0].status.replicas
+
+#create keda controller
