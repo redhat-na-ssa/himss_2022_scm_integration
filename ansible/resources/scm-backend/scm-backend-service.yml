@@ -139,7 +139,7 @@ items:
       app.kubernetes.io/component: {{ application_name }}
       app.kubernetes.io/instance: {{ application_name }}
       app.kubernetes.io/name: {{ application_name }}
-      app.openshift.io/runtime: quarkus
+      app.openshift.io/runtime: camel
       app.openshift.io/runtime-version: 0.0.2
   spec:
     replicas: 1

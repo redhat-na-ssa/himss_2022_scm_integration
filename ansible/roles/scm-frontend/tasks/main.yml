@@ -39,20 +39,21 @@
 - import_tasks: deploy_from_image.yml
   when: deploy_from is defined and deploy_from == "image"
 
-- set_fact:
-    route_hostname: "{{ application_name }}-{{ namespace }}.{{ ocp_domain_host.stdout }}"
-- name: "copy route template"
-  template:
-    src: "{{ resources_dir }}/route.yml"
-    dest: "{{ work_dir }}/route.yml"
-- name: "deploy {{ application_name }} route {{ route_hostname }}"
-  oc_obj:
-    state: present
-    oc_binary: "{{ openshift_cli }}"
-    name: "{{ application_name }}"
-    namespace: "{{ namespace }}"
-    kind: route
-    files:
-      - "{{ work_dir }}/route.yml"
+#knative service will create route
+# - set_fact:
+#     route_hostname: "{{ application_name }}-{{ namespace }}.{{ ocp_domain_host.stdout }}"
+# - name: "copy route template"
+#   template:
+#     src: "{{ resources_dir }}/route.yml"
+#     dest: "{{ work_dir }}/route.yml"
+# - name: "deploy {{ application_name }} route {{ route_hostname }}"
+#   oc_obj:
+#     state: present
+#     oc_binary: "{{ openshift_cli }}"
+#     name: "{{ application_name }}"
+#     namespace: "{{ namespace }}"
+#     kind: route
+#     files:
+#       - "{{ work_dir }}/route.yml"
 
 ###########################################################

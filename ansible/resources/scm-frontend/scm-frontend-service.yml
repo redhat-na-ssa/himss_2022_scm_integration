@@ -1,113 +1,83 @@
 ---
-
-kind: List
-apiVersion: v1
-items:
-- apiVersion: v1
-  kind: Service
-  metadata:
-    labels:
-      app: {{ application_name }}
-      monitoring: {{ prometheus_ServiceMonitor_label }}
-      expose: "true"
-    name: {{ application_name }}
-  spec:
-    ports:
-      - name: http
-        port: 8080
-        protocol: TCP
-        targetPort: 8080
-    selector:
-      group: scm 
-      app: {{ application_name }}
-    sessionAffinity: None
-    type: ClusterIP
-- apiVersion: apps.openshift.io/v1
-  kind: DeploymentConfig
-  metadata:
-    labels:
-      app: {{ application_name }}
-    name: {{ application_name }}
-  spec:
-    replicas: 1
-    revisionHistoryLimit: 2
-    selector:
-      group: scm
-      app: {{ application_name }}
-    strategy:
-      activeDeadlineSeconds: 21600
-      resources: {}
-      rollingParams:
-        intervalSeconds: 1
-        maxSurge: 25%
-        maxUnavailable: 25%
-        timeoutSeconds: 3600
-        updatePeriodSeconds: 1
-      type: Rolling
-    template:
-      metadata:
-        labels:
-          group: scm
-          app: {{ application_name }}
-      spec:
-        containers:
-          - env:
-            - name: KUBERNETES_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ application_name }}
+  labels:
+    app.kubernetes.io/component: {{ application_name }}
+    app.kubernetes.io/instance: {{ application_name }}
+    app.kubernetes.io/name: {{ application_name }}
+    app.openshift.io/runtime: camel
+    group: scm
+    # will this propagate to Service?, will this break dashboard
+    monitoring: {{ prometheus_ServiceMonitor_label }}
+    expose: "true"
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '10'
+        autoscaling.knative.dev/minScale: '1'
+        autoscaling.knative.dev/target: '1' # this means a target of max concurrent request, to reduce autoscale freq, increase number
+        #10 concurrent requests will scale up to 10 pods
+      labels:
+        app.kubernetes.io/component: {{ application_name }}
+        app.kubernetes.io/instance: {{ application_name }}
+        app.kubernetes.io/name: {{ application_name }}
+        app.openshift.io/runtime: camel
+        group: scm
+    spec:
+      containerConcurrency: 10
+      containers:
+        - resources:
+            limits:
+              cpu: 1500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 250Mi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 0
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: {{ application_name }}
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 0
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 3
+          env:
             - name: JAVA_OPTIONS
-              value: >
-                -Dquarkus.config.locations=/deployments/config -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus
+              value: >-
+                -Dquarkus.config.locations=/deployments/config
+                -Dvertx.metrics.options.enabled=true
+                -Dvertx.metrics.options.registryName=prometheus
             - name: AB_JOLOKIA_OFF
               value: 'true'
-            imagePullPolicy: IfNotPresent
-            name: {{ application_name }}
-            ports:
-              - containerPort: 9779
-                name: prometheus
-                protocol: TCP
-            livenessProbe:
-              failureThreshold: 3
-              httpGet:
-                path: /q/health/live
-                port: 8080
-                scheme: HTTP
-              initialDelaySeconds: 30
-              periodSeconds: 30
-              timeoutSeconds: 3
-            readinessProbe:
-              failureThreshold: 3
-              httpGet:
-                path: /q/health/ready
-                port: 8080
-                scheme: HTTP
-              initialDelaySeconds: 30
-              periodSeconds: 30
-              timeoutSeconds: 3
-            resources:
-              limits:
-                cpu: '1500m'
-                memory: '1Gi'
-              requests:
-                cpu: '250m'
-                memory: '250Mi'
-            securityContext:
-              privileged: false
-            terminationMessagePath: /dev/termination-log
-            terminationMessagePolicy: File
-            volumeMounts:
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
             - mountPath: /deployments/config
               name: config
-        dnsPolicy: ClusterFirst
-        restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        serviceAccount: {{ application_name }}
-        serviceAccountName: {{ application_name }}
-        terminationGracePeriodSeconds: 30
-        volumes:
+              readOnly: true
+          image: >-
+           {{ service_image }}:{{ service_image_tag }}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+      volumes:
         - configMap:
             defaultMode: 420
             items:
@@ -115,14 +85,133 @@ items:
                 path: {{ application_configmap_key }}
             name: {{ application_configmap }}
           name: config
-    triggers:
-      - type: ConfigChange
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-            - {{ application_name }}
-          from:
-            kind: ImageStreamTag
-            name: "{{ application_name }}:{{ service_image_tag }}"
-        type: ImageChange
+  traffic:
+    - latestRevision: true
+      percent: 100
+
+# kind: List
+# apiVersion: v1
+# items:
+# - apiVersion: v1
+#   kind: Service
+#   metadata:
+#     labels:
+#       app: {{ application_name }}
+#       monitoring: {{ prometheus_ServiceMonitor_label }}
+#       expose: "true"
+#     name: {{ application_name }}
+#   spec:
+#     ports:
+#       - name: http
+#         port: 8080
+#         protocol: TCP
+#         targetPort: 8080
+#     selector:
+#       group: scm 
+#       app: {{ application_name }}
+#     sessionAffinity: None
+#     type: ClusterIP
+# - apiVersion: apps.openshift.io/v1
+#   kind: DeploymentConfig
+#   metadata:
+#     labels:
+#       app: {{ application_name }}
+#     name: {{ application_name }}
+#   spec:
+#     replicas: 1
+#     revisionHistoryLimit: 2
+#     selector:
+#       group: scm
+#       app: {{ application_name }}
+#     strategy:
+#       activeDeadlineSeconds: 21600
+#       resources: {}
+#       rollingParams:
+#         intervalSeconds: 1
+#         maxSurge: 25%
+#         maxUnavailable: 25%
+#         timeoutSeconds: 3600
+#         updatePeriodSeconds: 1
+#       type: Rolling
+#     template:
+#       metadata:
+#         labels:
+#           group: scm
+#           app: {{ application_name }}
+#       spec:
+#         containers:
+#           - env:
+#             - name: KUBERNETES_NAMESPACE
+#               valueFrom:
+#                 fieldRef:
+#                   apiVersion: v1
+#                   fieldPath: metadata.namespace
+#             - name: JAVA_OPTIONS
+#               value: >
+#                 -Dquarkus.config.locations=/deployments/config -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus
+#             - name: AB_JOLOKIA_OFF
+#               value: 'true'
+#             imagePullPolicy: IfNotPresent
+#             name: {{ application_name }}
+#             ports:
+#               - containerPort: 9779
+#                 name: prometheus
+#                 protocol: TCP
+#             livenessProbe:
+#               failureThreshold: 3
+#               httpGet:
+#                 path: /q/health/live
+#                 port: 8080
+#                 scheme: HTTP
+#               initialDelaySeconds: 30
+#               periodSeconds: 30
+#               timeoutSeconds: 3
+#             readinessProbe:
+#               failureThreshold: 3
+#               httpGet:
+#                 path: /q/health/ready
+#                 port: 8080
+#                 scheme: HTTP
+#               initialDelaySeconds: 30
+#               periodSeconds: 30
+#               timeoutSeconds: 3
+#             resources:
+#               limits:
+#                 cpu: '1500m'
+#                 memory: '1Gi'
+#               requests:
+#                 cpu: '250m'
+#                 memory: '250Mi'
+#             securityContext:
+#               privileged: false
+#             terminationMessagePath: /dev/termination-log
+#             terminationMessagePolicy: File
+#             volumeMounts:
+#             - mountPath: /deployments/config
+#               name: config
+#         dnsPolicy: ClusterFirst
+#         restartPolicy: Always
+#         schedulerName: default-scheduler
+#         securityContext: {}
+#         serviceAccount: {{ application_name }}
+#         serviceAccountName: {{ application_name }}
+#         terminationGracePeriodSeconds: 30
+#         volumes:
+#         - configMap:
+#             defaultMode: 420
+#             items:
+#               - key: {{ application_configmap_key }}
+#                 path: {{ application_configmap_key }}
+#             name: {{ application_configmap }}
+#           name: config
+#     triggers:
+#       - type: ConfigChange
+#       - imageChangeParams:
+#           automatic: true
+#           containerNames:
+#             - {{ application_name }}
+#           from:
+#             kind: ImageStreamTag
+#             name: "{{ application_name }}:{{ service_image_tag }}"
+#         type: ImageChange
 

@@ -1,4 +1,5 @@
 # oc get routes.serving.knative.dev scm-frontend -n user1-himss2022-scm 
+# SCM_FRONTEND=oc get ksvc scm-frontend -o template --template='{{.status.url}}'
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
@@ -9,6 +10,10 @@ metadata:
     app.kubernetes.io/instance: scm-frontend
     app.kubernetes.io/name: scm-frontend
     app.openshift.io/runtime: camel
+    group: scm
+    # will this propagate to Service?, will this break dashboard
+    monitoring: prometheus
+    expose: "true"
 spec:
   template:
     metadata:
@@ -22,6 +27,7 @@ spec:
         app.kubernetes.io/instance: scm-frontend
         app.kubernetes.io/name: scm-frontend
         app.openshift.io/runtime: camel
+        group: scm
     spec:
       containerConcurrency: 10
       containers:

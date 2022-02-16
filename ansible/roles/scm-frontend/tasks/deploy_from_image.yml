@@ -29,7 +29,9 @@
     state: list
     namespace: "{{ namespace }}"
     name: "{{ application_name }}"
-    kind: dc
+    # dc to ksvc
+    #kind: dc
+    kind: ksvc
   register: result
 
 - name: deploy {{ application_name }} application
@@ -41,12 +43,25 @@
       - "{{ work_dir }}/{{ application_template }}"
   when: result.ansible_module_results.stderr is defined and result.ansible_module_results.stderr != ""
 
+# - name: "wait until {{ application_name }} application is up and running"
+#   #shell: "{{ openshift_cli }} get dc {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
+#   shell: "{{ openshift_cli }} get deployment -lapp.kubernetes.io/name={{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
+#   vars:
+#     json_template: '\{\{.status.readyReplicas\}\}'
+#   register: result
+#   until: result.stdout == "1"
+#   retries: 10
+#   delay: 30
+#   changed_when: false
+
+# not the best check but deployment based on selector not working
 - name: "wait until {{ application_name }} application is up and running"
-  shell: "{{ openshift_cli }} get dc {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
+  shell: "{{ openshift_cli }} get ksvc {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
   vars:
-    json_template: '\{\{.status.readyReplicas\}\}'
+    json_template: '\{\{.status.address.url\}\}'
   register: result
-  until: result.stdout == "1"
+  # need to fix this condition
+  until: result.stdout != ""
   retries: 10
   delay: 30
   changed_when: false

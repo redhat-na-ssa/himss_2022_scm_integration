@@ -1,20 +1,22 @@
 ---
 
-- name: delete deployment config
+#- name: delete deployment config
+- name: delete knative service
   oc_obj:
     oc_binary: "{{ openshift_cli }}"
     state: absent
     name: "{{ application_name }}"
     namespace: "{{ namespace }}"
-    kind: dc
+    #kind: dc
+    kind: ksvc
 
-- name: delete service
-  oc_obj:
-    oc_binary: "{{ openshift_cli }}"
-    state: absent
-    name: "{{ application_name }}"
-    namespace: "{{ namespace }}"
-    kind: service
+# - name: delete service
+#   oc_obj:
+#     oc_binary: "{{ openshift_cli }}"
+#     state: absent
+#     name: "{{ application_name }}"
+#     namespace: "{{ namespace }}"
+#     kind: service
 
 - name: delete imagestream in the {{ namespace }} project
   oc_obj:
