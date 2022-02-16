@@ -14,3 +14,4 @@ keda_operator_csv_prefix: keda
 
 # KedaController CR
 keda_controller_name: keda
+keda_controller_template: keda-controller.yaml

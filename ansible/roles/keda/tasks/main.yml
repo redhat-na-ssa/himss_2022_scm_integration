@@ -1,7 +1,6 @@
 ---
 # tasks file for keda
 
-# create keda namespace
 - name: create project {{ namespace }}
   oc_project:
     state: present
@@ -49,4 +48,25 @@
       r_keda_operator_deployment.ansible_module_results.results[0].status.readyReplicas ==
       r_keda_operator_deployment.ansible_module_results.results[0].status.replicas
 
-#create keda controller
+- name: copy kedacontroller template
+  template:
+    src: "{{ resources_dir }}/{{ keda_controller_template }}"
+    dest: "{{ work_dir }}/{{ keda_controller_template }}"
+
+- name: check if KedaController {{ keda_controller_name }} is deployed
+  oc_obj:
+    oc_binary: "{{ openshift_cli }}"
+    state: list
+    namespace: "{{ namespace }}"
+    name: "{{ keda_controller_name }}"
+    kind: kedacontrollers.keda.sh
+  register: result
+
+- name: "create KedaController CR {{ keda_controller_name }} in {{ namespace }}"
+  oc_list:
+    oc_binary: "{{ openshift_cli }}"
+    state: present
+    namespace: "{{ keda_controller_name }}"
+    files:
+      - "{{ work_dir }}/{{ keda_controller_template }}"
+  when: result.ansible_module_results.stderr is defined and result.ansible_module_results.stderr != ""

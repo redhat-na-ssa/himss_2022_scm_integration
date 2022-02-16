@@ -1,5 +1,12 @@
 
-#delete KedaController
+- name: "delete KedaController in {{ namespace }}"
+  oc_obj:
+    state: absent
+    oc_binary: "{{ openshift_cli }}"
+    name: keda
+    namespace: "{{ namespace }}"
+    kind: kedacontrollers.keda.sh
+
 
 - name: "delete keda operator in {{ namespace }}"
   import_role:

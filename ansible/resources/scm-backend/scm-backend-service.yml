@@ -226,6 +226,7 @@ items:
 # KEDA scaledObject
 # will fail if KEDA Operator and KedaController not installed
 #maybe add a flag for installing KEDA?
+#maybe add flafs for pollingINteral, minReplicaCount, lagThreshold
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
