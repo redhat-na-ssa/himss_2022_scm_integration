@@ -37,7 +37,7 @@ public class CamelResource {
         try (Connection con = dataSource.getConnection()) {
             con.setAutoCommit(true);
             if(flushDbAtStartup){
-                String flushTable = "TRUNCATE "+Util.AM3X+", "+Util.DDAS+", "+Util.DETM+";";
+                String flushTable = "TRUNCATE "+Util.AM3X+", "+Util.DETM+";";
                 Statement statement = con.createStatement();
                 statement.execute(flushTable);
                 log.warn("postConstruct() just flushed all tables");

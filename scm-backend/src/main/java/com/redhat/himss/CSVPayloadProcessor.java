@@ -42,11 +42,9 @@ public class CSVPayloadProcessor {
             // 1) Build appropriate prepared statement based on file type
             StringBuilder sBuilder = new StringBuilder();
             if(fHeader.startsWith(Util.AM3X)){
-                sBuilder.append("insert into "+Util.AM3X+"(column1, column2) VALUES (?,?)");
-            }else if(fHeader.startsWith(Util.DDAS)) {
-                sBuilder.append("insert into "+Util.DDAS+"(column1, column2) VALUES (?,?)");
+                sBuilder.append(Util.AM3X_INSERT_SQL_HEADER);
             }else if(fHeader.startsWith(Util.DETM)) {
-                sBuilder.append("insert into "+Util.DETM+"(column1, column2) VALUES (?,?)");
+                sBuilder.append("insert into "+Util.DETM+"(device_code, centrally_managed_indicator, retired_indicator, device_description,risk_level_type_code, device_class_code, accountable_equipment_code, maintenance_required_indicator, life_expectancy,delete_indicator,specialty_code, federal_supply_class_fsc) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
             }else{
                 throw new ValidationException("000005 wrong file type: "+fHeader);
             }

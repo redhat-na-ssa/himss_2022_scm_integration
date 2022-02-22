@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 
 import javax.activation.DataHandler;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.apache.camel.Exchange;
