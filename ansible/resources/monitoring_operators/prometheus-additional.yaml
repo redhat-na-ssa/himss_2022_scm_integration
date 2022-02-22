@@ -2,7 +2,7 @@
   metrics_path: '/q/metrics'
   scrape_interval: 3s
   static_configs:
-    - targets: ['scm-frontend:8080']
+    - targets: ['scm-frontend-00001-private:80']
 
 - job_name: 'himss2022-scm-backend'
   metrics_path: '/q/metrics'

@@ -40,6 +40,17 @@ TO-DO
 
 === Grafana Dashboard
 
+. Grafana Admin credentials:  
+
+.. Local environment:  _admin / admin_
+.. OCP environment:
++
+-----
+$ POD=$(oc get pod -n user1-himss2022-scm | grep "^grafana-deployment" | awk '{print $1}')
+$ oc rsh -c grafana $POD env | grep GF_SECURITY_ADMIN_
+-----
+
+
 . First draft 
 +
 image::docs/images/b_kpis.png[]
@@ -128,13 +139,13 @@ $ ansible-playbook playbooks/uninstall.yml
 == Smoke Test
 
 -----
-$ SCM_FRONTEND_HOST=$(oc get route scm-frontend -n user1-himss2022-scm --template='{{ .spec.host }}')
+$ SCM_FRONTEND_HOST=$(oc get kservice scm-frontend -n user1-himss2022-scm --template='{{ .status.url }}' | sed 's/"//g')
 $ cd scm-frontend 
 
 $ curl -v -X POST \
     -F "data=@src/test/himss/good/AM3X-034540-6636-2-19710723.tgz" \
     -F "data=@src/test/himss/good/DETM-NKI7I92LX7P-5221-6-20000907.tgz" \
-    https://$SCM_FRONTEND_HOST/gzippedFiles
+    $SCM_FRONTEND_HOST/gzippedFiles
 -----
 
 == Development
