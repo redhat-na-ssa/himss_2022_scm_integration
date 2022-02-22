@@ -13,47 +13,26 @@ TO-DO
 
 == Technical Discussion Vectors
 
-. *Operations*
-.. Ansible for automated and repeatable deployment of Application Services to OpenShift
-
 . *Events in Motion*
 .. Use of Red Hat AMQ Streams
 .. Visibility of events via KafDrop
 
-. *Polyglot Frameworks*
+. *Polyglot App Frameworks*
 .. Quarkus
 .. Camel
 
-. *Monitoring*
-.. Business Dashboards using Grafana's Postgresql driver
-.. Operational Dashboards using Grafana's Prometheus driver
-.. Quarkus micro-profile metrics scraped by Prometheus
+. *Operations*
+.. *Ansible*
+... Ansible is used for automated and repeatable deployment of Application Services to OpenShift
 
+.. *Monitoring*
+... Business Dashboards using Grafana's Postgresql driver
+... Operational Dashboards using Grafana's Prometheus driver
+... Quarkus micro-profile metrics scraped by Prometheus
 
-TO_DO
-
-== Demo Components
-
-The purpose of this section is to highlight the major components of the demo.
-
-TO-DO
-
-=== Grafana Dashboard
-
-. Grafana Admin credentials:  
-
-.. Local environment:  _admin / admin_
-.. OCP environment:
-+
------
-$ POD=$(oc get pod -n user1-himss2022-scm | grep "^grafana-deployment" | awk '{print $1}')
-$ oc rsh -c grafana $POD env | grep GF_SECURITY_ADMIN_
------
-
-
-. First draft 
-+
-image::docs/images/b_kpis.png[]
+.. *App Scalability*
+... Knative Serverless is used to auto-scale HTTP based _scm-frontend_ service
+... Keda is used to auto-scale async kafka based _scm-backend_ service
 
 
 == Deploy to OpenShift using Ansible
@@ -118,7 +97,7 @@ $ ansible-playbook playbooks/install.yml
 
 .. Deployment should complete in about 10 minutes.
 
-.. Notice the creation of a new OCP namespace where the application resides: _user1-scm_
+.. Notice the creation of a new OCP namespace where the application resides: _user1-himss2022-scm_
 
 .. At the completion of the installation, expect to see messages similar to the following:
 +
@@ -138,8 +117,15 @@ $ ansible-playbook playbooks/uninstall.yml
 
 == Smoke Test
 
+. Set environment variable to _scm-frontend_ route exposed by KNative:app-name:
++
 -----
 $ SCM_FRONTEND_HOST=$(oc get kservice scm-frontend -n user1-himss2022-scm --template='{{ .status.url }}' | sed 's/"//g')
+-----
+
+. Execute smoke test:
++
+-----
 $ cd scm-frontend 
 
 $ curl -v -X POST \
@@ -147,6 +133,50 @@ $ curl -v -X POST \
     -F "data=@src/test/himss/good/DETM-NKI7I92LX7P-5221-6-20000907.tgz" \
     $SCM_FRONTEND_HOST/gzippedFiles
 -----
+
+. Expected response should be similar to the following: 
++
+-----
+* Connection #0 to host scm-frontend-user1-himss2022-scm.apps.cluster-7c8qw.7c8qw.sandbox1691.opentlc.com left intact
+ALL FILES PERSISTED
+-----
+
+. The log of the _scm-backend_ pod should include statements such as the following: 
++
+-----
+19:15:25 INFO  [co.re.hi.Routes] (Camel (camel-1) thread #4 - KafkaConsumer[topic-scm-file]) CSVPayloadProcessor.process() DETM-NKI7I92LX7P-5221-6-20000907.txt :   # of rows = 200
+19:15:25 WARN  [co.re.hi.Routes] (Camel (camel-1) thread #4 - KafkaConsumer[topic-scm-file]) will intentionally delay persist by the following millis: 1,000
+19:15:25 INFO  [co.re.hi.Routes] (Camel (camel-1) thread #3 - KafkaConsumer[topic-scm-file]) CSVPayloadProcessor.process() AM3X-034540-6636-2-19710723.txt :   # of rows = 200
+19:15:25 WARN  [co.re.hi.Routes] (Camel (camel-1) thread #3 - KafkaConsumer[topic-scm-file]) will intentionally delay persist by the following millis: 1,000
+-----
+
+
+== Load Test
+
+TO-DO
+
+== Demo Components
+
+The purpose of this section is to highlight the major components of the demo.
+
+TO-DO
+
+=== Grafana Dashboard
+
+. Grafana Admin credentials:  
+
+.. Local environment:  _admin / admin_
+.. OCP environment:
++
+-----
+$ POD=$(oc get pod -n user1-himss2022-scm | grep "^grafana-deployment" | awk '{print $1}')
+$ oc rsh -c grafana $POD env | grep GF_SECURITY_ADMIN_
+-----
+
+
+. First draft 
++
+image::docs/images/b_kpis.png[]
 
 == Development
 === App Metrics
