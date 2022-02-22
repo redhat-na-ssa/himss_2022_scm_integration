@@ -10,7 +10,7 @@ binary_imagestream_template: binary-imagestream.yml
 
 service_image: quay.io/redhat_naps_da/himss_2022_scm-frontend-jvm
 #service_image: quay.io/redhat_naps_da/himss_2022_scm-frontend-native
-service_image_tag: 0.0.1
+service_image_tag: 0.0.2
 application_template: scm-frontend-service.yml
 
 

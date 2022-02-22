@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# podman build -f src/main/docker/Dockerfile.jvm -t quay.io/redhat_naps_da/himss_2022_scm-backend-jvm:0.0.2 .
+# podman build -f src/main/docker/Dockerfile.jvm -t quay.io/redhat_naps_da/himss_2022_scm-backend-jvm:0.0.3 .
 #
 # Then run the container using:
 #
