@@ -1,5 +1,5 @@
 # oc get routes.serving.knative.dev scm-frontend -n user1-himss2022-scm 
-# SCM_FRONTEND=oc get ksvc scm-frontend -o template --template='{{.status.url}}'
+# SCM_FRONTEND=$(oc get ksvc scm-frontend -o template --template='{{.status.url}}')
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
