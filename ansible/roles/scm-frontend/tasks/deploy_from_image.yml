@@ -54,7 +54,7 @@
 #   delay: 30
 #   changed_when: false
 
-# not the best check but deployment based on selector not working
+# not the best check but deployment based on selector not working..try jsonpath instead
 - name: "wait until {{ application_name }} application is up and running"
   shell: "{{ openshift_cli }} get ksvc {{ application_name }} -o template --template={{ json_template }} -n {{ namespace }}"
   vars:
