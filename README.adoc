@@ -132,8 +132,8 @@ $ SCM_FRONTEND_HOST=$(oc get route scm-frontend -n user1-himss2022-scm --templat
 $ cd scm-frontend 
 
 $ curl -v -X POST \
-    -F "data=@src/test/himss/good/AM3X-365115-2021285.tgz" \
-    -F "data=@src/test/himss/good/DDAS-365115-2021285.tgz" \
+    -F "data=@src/test/himss/good/AM3X-034540-6636-2-19710723.tgz" \
+    -F "data=@src/test/himss/good/DETM-NKI7I92LX7P-5221-6-20000907.tgz" \
     https://$SCM_FRONTEND_HOST/gzippedFiles
 -----
 

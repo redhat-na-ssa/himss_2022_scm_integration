@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 
 import javax.activation.DataHandler;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.apache.camel.Exchange;
@@ -43,8 +42,10 @@ public class Routes extends RouteBuilder {
                 .endRest();
 
         // curl -v -X POST -F "data=@src/test/himss/nogood/AM3X-365115-1002-1-2021285.txt" localhost:8180/gzippedFiles
-        // curl -v -X POST -F "data=@src/test/himss/good/AM3X-365115-2021285.tgz" localhost:8180/gzippedFiles
-        // curl -v -X POST -F "data=@src/test/himss/good/AM3X-365115-2021285.tgz" -F "data=@src/test/himss/good/DDAS-365115-2021285.tgz" localhost:8180/gzippedFiles
+        // curl -v -X POST -F "data=@src/test/himss/nogood/AM3X-365115-2021285.tgz" localhost:8180/gzippedFiles
+        // curl -v -X POST -F "data=@src/test/himss/good/DETM-NKI7I92LX7P-5221-6-20000907.tgz" localhost:8180/gzippedFiles
+        // curl -v -X POST -F "data=@src/test/himss/good/AM3X-343411-2247-2-20000502.tgz" localhost:8180/gzippedFiles
+        // curl -v -X POST -F "data=@src/test/himss/good/DETM-4Z40Y7E029Q-2125-6-19920525.tgz" -F "data=@src/test/himss/good/AM3X-034540-6636-2-19710723.tgz" localhost:8180/gzippedFiles
         rest("/gzippedFiles")
           .description("Consume Gzipped Files")
           .consumes("multipart/form-data")
@@ -85,7 +86,7 @@ public class Routes extends RouteBuilder {
 
     
         /*****                Consume from filesystem           *************/
-        from("file:{{himss.scm.gzip.location}}?initialDelay=0&delay=1000&autoCreate=true&delete=true")
+        from("file:{{himss.scm.gzip.location}}?initialDelay=0&delay=1000&autoCreate=true&delete=false")
             .routeId("direct:unpackGzip")
                 .unmarshal()
                 .gzipDeflater()
