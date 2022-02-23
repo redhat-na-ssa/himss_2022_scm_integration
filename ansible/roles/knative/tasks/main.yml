@@ -1,6 +1,11 @@
 ---
 
-
+- name: "create project {{ namespace_serverless_operator }}"
+  oc_project:
+    state: present
+    oc_binary: "{{ openshift_cli }}"
+    name: "{{ namespace_serverless_operator }}"
+  when: result.ansible_module_results.stderr is defined and result.ansible_module_results.stderr != ""
 
 - name: "deploy serverless operator in {{ namespace_serverless_operator }} namespace"
   import_role:
