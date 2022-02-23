@@ -1,6 +1,6 @@
-FROM registry.access.redhat.com/ubi8/ubi:8.4
+FROM registry.access.redhat.com/ubi8/ubi:8.5
 
-RUN dnf -y update && dnf -y install make gcc-c++
+RUN yum -y update && yum -y install make gcc-c++
 
 RUN useradd --create-home --shell /bin/bash appuser
 RUN mkdir -p /app/output/sent && mkdir /app/target && chown -R appuser.appuser /app
