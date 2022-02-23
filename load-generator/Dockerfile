@@ -1,4 +1,4 @@
-FROM docker.io/fedora:36
+FROM registry.access.redhat.com/ubi8/ubi:8.4
 
 RUN dnf -y update && dnf -y install make gcc-c++
 
