@@ -13,6 +13,34 @@ TO-DO
 
 == Technical Discussion Vectors
 
+. *App Throughput / Scalability*
+.. `scm-frontend`
++
+(Quarkus / RESTEasy / Camel syncronous blocking service)
+
+... Throughput of the app JVM can be adjusted via  _quarkus.vertx.worker-pool-size_ setting
+... Auto-scalability beyond app JVM can be accomplished via Knative Serverless
+
+.. `scm-backend`
++
+(Quarkus / Kafka / Camel async non-blocking event consumer)
+
+... Throughput is already very high within the app JVM due to the use of the Quarkus/Vert.x link:https://quarkus.io/blog/io-thread-benchmark/[IO thread]
+... Auto-scalability beyond app JVM can be accomplished via Keda
+
+
+. *Ansible*
+.. Ansible is used for automated and repeatable deployment of Application Services to OpenShift
+
+. *Monitoring*
+.. *App Dashboards*
+... Business Dashboards using Grafana's Postgresql driver
+... Operational Dashboards using Grafana's Prometheus driver
+... Quarkus micro-profile metrics scraped by Prometheus
+.. *Operational Dashboards*
++
+OpenShift provides out-of-the-box dashboards that provide awareness as to the health and state of the cluster. 
+
 . *Events in Motion*
 .. Use of Red Hat AMQ Streams
 .. Visibility of events via KafDrop
@@ -21,37 +49,25 @@ TO-DO
 .. Quarkus
 .. Camel
 
-. *Operations*
-.. *Ansible*
-... Ansible is used for automated and repeatable deployment of Application Services to OpenShift
-
-.. *Monitoring*
-... Business Dashboards using Grafana's Postgresql driver
-... Operational Dashboards using Grafana's Prometheus driver
-... Quarkus micro-profile metrics scraped by Prometheus
-
-.. *App Scalability*
-... Knative Serverless is used to auto-scale HTTP based _scm-frontend_ service
-... Keda is used to auto-scale async kafka based _scm-backend_ service
-
-
 == Deploy to OpenShift using Ansible
 
 Ansible is included to deploy this application to OpenShift in a repeatable manner.
 
 === Pre-reqs:
 
-. OpenShift Container Platform version 4.7.* or more recent. Resource requirements needed by the app (doesn’t include resource requirements of Openshift to support itself) is as follows:
+. OpenShift Container Platform version 4.9.*. 
++
+Resource requirements needed by the app (doesn’t include resource requirements of Openshift to support itself) is as follows:
 
 .. RAM: 6 GB
 
-.. CPU: 8
+.. CPU: 6
 
-.. Storage: 10 PVCs of type RWO (no RWX requirement) and each of size 5 GiB
+.. Storage: 5 PVCs of type RWO (no RWX requirement) and each of size 5 GiB
 
-. cluster-admin credentials to this OpenShift cluster are needed
+. `cluster-admin` credentials to this OpenShift cluster
 
-. Corresponding oc utility installed locally
+. `oc` utility (corresponding to version of OCP cluster) installed locally
 +
 All versions of this utility are available at either of the following:
 
@@ -63,11 +79,11 @@ RHN subscription required
 +
 Accessible without a RHN subscription
 
-. ansible installed locally
+. `ansible` installed locally
 +
 ie: dnf install ansible
 
-. git installed locally
+. `git` installed locally
 
 === Procedure:
 
@@ -117,7 +133,7 @@ $ ansible-playbook playbooks/uninstall.yml
 
 == Smoke Test
 
-. Set environment variable to _scm-frontend_ route exposed by KNative:app-name:
+. Set environment variable to _scm-frontend_ route exposed by KNative:
 +
 -----
 $ SCM_FRONTEND_HOST=$(oc get kservice scm-frontend -n user1-himss2022-scm --template='{{ .status.url }}' | sed 's/"//g')
@@ -153,11 +169,13 @@ ALL FILES PERSISTED
 
 == Load Test
 
+This demo includes a custom load testing tool that generates test data and posts to the _scm-frontend_ service.
+
 TO-DO
 
-== Demo Components
+== Demo Script
 
-The purpose of this section is to highlight the major components of the demo.
+The purpose of this section is to highlight the major components of the demo and propose an outline toward delivering the demo.
 
 TO-DO
 
