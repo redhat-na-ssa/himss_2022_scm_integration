@@ -15,6 +15,117 @@
     files:
       - "{{ work_dir }}/{{ kafka_template }}"
 
+# zookeeper
+- name: "if fips is enabled, wait until zookeeper statefulset is created"
+  oc_obj:
+    state: list
+    oc_binary: "{{ openshift_cli }}"
+    kind: StatefulSet
+    namespace: "{{ namespace }}"
+  when: fips_enabled_cluster == "true"  
+  register: r_zookeeper_deployment
+  retries: 30
+  delay: 5
+  until:
+    - r_zookeeper_deployment.ansible_module_results.results | length > 0
+    - r_zookeeper_deployment | to_json | from_json | json_query(jmesquery) | length > 0
+  vars:
+    jmesquery: "ansible_module_results.results[0].items[*].metadata.name[] | [?starts_with(@, '{{ kafka_cluster }}-zookeeper') == `true`]"
+
+# need to fix
+# - name: "if the cluster is fips enabled, has the environment variable for fips been set"
+#   shell: "{{ openshift_cli }} describe statefulset {{ kafka_cluster }}-zookeeper |  grep  -c com.redhat.fips=false"
+#   register: r_fips_env_var_set
+
+- name: "if the cluster is fips enabled, scale down zookeeper"
+  shell: oc scale --replicas=0 statefulset {{ kafka_cluster }}-zookeeper
+    # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"  
+
+- name: "if the cluster is fips enabled, update the envrionment variables"
+  shell: "{{ openshift_cli }} set env statefulset {{ kafka_cluster }}-zookeeper  JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
+  # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"   
+
+- name: "if the cluster is fips enabled, scale up zookeeper"
+  shell: oc scale --replicas=3 statefulset {{ kafka_cluster }}-zookeeper
+    # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"  
+
+# kafka cluster
+- name: "if fips is enabled, wait until kafka statefulset is created"
+  oc_obj:
+    state: list
+    oc_binary: "{{ openshift_cli }}"
+    kind: StatefulSet
+    namespace: "{{ namespace }}"
+  when: fips_enabled_cluster == "true"  
+  register: r_zookeeper_deployment
+  retries: 30
+  delay: 5
+  until:
+    - r_zookeeper_deployment.ansible_module_results.results | length > 0
+    - r_zookeeper_deployment | to_json | from_json | json_query(jmesquery) | length > 0
+  vars:
+    jmesquery: "ansible_module_results.results[0].items[*].metadata.name[] | [?starts_with(@, '{{ kafka_cluster }}-kafka') == `true`]"
+
+# need to fix
+# - name: "if the cluster is fips enabled, has the environment variable for fips been set"
+#   shell: "{{ openshift_cli }} describe statefulset {{ kafka_cluster }}-kafka |  grep  -c com.redhat.fips=false"
+#   register: r_fips_env_var_set
+
+- name: "if the cluster is fips enabled, scale down zookeeper"
+  shell: oc scale --replicas=0 statefulset {{ kafka_cluster }}-kafka
+    # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"  
+
+- name: "if the cluster is fips enabled, update the envrionment variables"
+  shell: "{{ openshift_cli }} set env statefulset {{ kafka_cluster }}-kafka  JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
+  # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"   
+
+- name: "if the cluster is fips enabled, scale up zookeeper"
+  shell: oc scale --replicas=3 statefulset {{ kafka_cluster }}-kafka
+    # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"  
+
+
+# entity operator 
+- name: "if fips is enabled, wait until kafka entity operator is created"
+  oc_obj:
+    state: list
+    oc_binary: "{{ openshift_cli }}"
+    kind: Deployment
+    namespace: "{{ namespace }}"
+  when: fips_enabled_cluster == "true"  
+  register: r_zookeeper_deployment
+  retries: 30
+  delay: 5
+  until:
+    - r_zookeeper_deployment.ansible_module_results.results | length > 0
+    - r_zookeeper_deployment | to_json | from_json | json_query(jmesquery) | length > 0
+  vars:
+    jmesquery: "ansible_module_results.results[0].items[*].metadata.name[] | [?starts_with(@, '{{ kafka_cluster }}-entity-operator') == `true`]"
+
+# need to fix
+# - name: "if the cluster is fips enabled, has the environment variable for fips been set"
+#   shell: "{{ openshift_cli }} describe deployment {{ kafka_cluster }}-entity-operator |  grep  -c com.redhat.fips=false"
+#   register: r_fips_env_var_set
+
+
+- name: "if the cluster is fips enabled, update the envrionment variables"
+  shell: "{{ openshift_cli }} set env deployment {{ kafka_cluster }}-entity-operator JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
+  # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"   
+
+
 - name: "wait until kafka-cluster-entity-operator is active in {{ namespace }}"
   oc_obj:
     state: list
