@@ -106,7 +106,7 @@
     dest: "{{ work_dir }}/prometheus-additional.yaml"
 
 - name: create secret additional-scrape-configs
-  command: "{{ openshift_cli }} create secret generic additional-scrape-configs --from-file={{ work_dir }}/prometheus-additional.yaml"
+  command: "{{ openshift_cli }} create secret generic additional-scrape-configs --from-file={{ work_dir }}/prometheus-additional.yaml -n {{ namespace }}"
   ignore_errors: yes
 
 
