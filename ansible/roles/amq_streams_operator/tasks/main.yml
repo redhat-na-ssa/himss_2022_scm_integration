@@ -43,6 +43,19 @@
     query: >-
       [?starts_with(metadata.name, '{{ amq_streams_operator_deployment }}')].metadata.name|[0]
 
+# need to fix
+# - name: "if the cluster is fips enabled, has the environment variable for fips been set"
+#   shell: "{{ openshift_cli }} describe deployment {{ amq_streams_operator_deployment_name }} |  grep  -c com.redhat.fips=false"
+#   register: r_fips_env_var_set
+
+
+- name: "if the cluster is fips enabled, update the envrionment variables"
+  shell: "{{ openshift_cli }} set env deployment {{ amq_streams_operator_deployment_name }} JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
+  # fix when above command is working
+  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+  when: fips_enabled_cluster == "true"   
+
+
 - name: "wait until amq streams operator is active"
   oc_obj:
     state: list

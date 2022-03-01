@@ -70,8 +70,6 @@ kafka_debezium_topic: "{{ kafka_debezium_db_server_name }}.{{ kafka_debezium_tab
 
 
 ###########     Knative   ################
-# TO-DO:  Knative not currently used
-
 namespace_knativeserving: knative-serving
 namespace_knativeeventing: knative-eventing
 ##########################################
@@ -81,3 +79,6 @@ namespace_knativeeventing: knative-eventing
 keda_namepsace: keda
 ###########################
 
+####### FIPS ##############
+fips_enabled_cluster: false
+###########################

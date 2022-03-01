@@ -111,6 +111,12 @@ $ cd ansible
 $ ansible-playbook playbooks/install.yml
 -----
 
+If this is an OpenShift cluster with FIPS enabled,then run the following instead: 
+
+-----
+$ ansible-playbook --extra-vars '{"fips_enabled_cluster":"true"}' playbooks/install.yml
+-----
+
 .. Deployment should complete in about 10 minutes.
 
 .. Notice the creation of a new OCP namespace where the application resides: _user1-himss2022-scm_
