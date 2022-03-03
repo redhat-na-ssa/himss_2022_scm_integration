@@ -49,17 +49,17 @@
 #   register: r_fips_env_var_set
 
 
-- name: "if the cluster is fips enabled, update the envrionment variables"
+- name: "if the cluster is fips enabled, update the environment variables"
   shell: "{{ openshift_cli }} set env deployment {{ amq_streams_operator_deployment_name }} JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
   # fix when above command is working
   # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
-  when: fips_enabled_cluster == "true"   
+  when: fips_enabled_cluster == "true"
 
 
 - name: "wait until amq streams operator is active"
   oc_obj:
     state: list
-    oc_binary: "{{ openshift_cli }}"    
+    oc_binary: "{{ openshift_cli }}"
     kind: Deployment
     name: "{{ amq_streams_operator_deployment_name }}"
     namespace: "{{ namespace_amq_streams_operator }}"

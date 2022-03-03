@@ -48,8 +48,8 @@
     kind: InstallPlan
     namespace: "{{ subscription_namespace }}"
   register: r_install_plan
-  retries: 30
-  delay: 5
+  retries: 60
+  delay: 10
   until:
     - r_install_plan.ansible_module_results.results | length > 0
     - r_install_plan.ansible_module_results.results[0] | to_json | from_json | json_query(jmesquery) | length > 0

@@ -39,7 +39,7 @@ TO-DO
 ... Quarkus micro-profile metrics scraped by Prometheus
 .. *Operational Dashboards*
 +
-OpenShift provides out-of-the-box dashboards that provide awareness as to the health and state of the cluster. 
+OpenShift provides out-of-the-box dashboards that provide awareness as to the health and state of the cluster.
 
 . *Events in Motion*
 .. Use of Red Hat AMQ Streams
@@ -55,7 +55,7 @@ Ansible is included to deploy this application to OpenShift in a repeatable mann
 
 === Pre-reqs:
 
-. OpenShift Container Platform version 4.9.*. 
+. OpenShift Container Platform version 4.9.*.
 +
 Resource requirements needed by the app (doesn’t include resource requirements of Openshift to support itself) is as follows:
 
@@ -111,7 +111,7 @@ $ cd ansible
 $ ansible-playbook playbooks/install.yml
 -----
 
-If this is an OpenShift cluster with FIPS enabled,then run the following instead: 
+If this is an OpenShift cluster with FIPS enabled,then run the following instead:
 
 -----
 $ ansible-playbook --extra-vars '{"fips_enabled_cluster":"true"}' playbooks/install.yml
@@ -148,22 +148,22 @@ $ SCM_FRONTEND_HOST=$(oc get kservice scm-frontend -n user1-himss2022-scm --temp
 . Execute smoke test:
 +
 -----
-$ cd scm-frontend 
-
-$ curl -v -X POST \
-    -F "data=@src/test/himss/good/AM3X-034540-6636-2-19710723.tgz" \
-    -F "data=@src/test/himss/good/DETM-NKI7I92LX7P-5221-6-20000907.tgz" \
-    $SCM_FRONTEND_HOST/gzippedFiles
+docker run --rm --name scm-datagen -e SCM_UPLOAD_TIMES=1 -e SCM_URL=$SCM_FRONTEND_HOST/gzippedFiles quay.io/jkeam/scm-datagen
 -----
 
-. Expected response should be similar to the following: 
+. Expected response should be similar to the following:
 +
 -----
 * Connection #0 to host scm-frontend-user1-himss2022-scm.apps.cluster-7c8qw.7c8qw.sandbox1691.opentlc.com left intact
 ALL FILES PERSISTED
 -----
 
-. The log of the _scm-backend_ pod should include statements such as the following: 
+. The log of the _scm-backend_ pod should include statements such as the following:
++
+-----
+oc logs $(oc get pods -o name -n user1-himss2022-scm | grep scm-backend | grep -v psql) -n user1-himss2022-scm
+-----
+
 +
 -----
 19:15:25 INFO  [co.re.hi.Routes] (Camel (camel-1) thread #4 - KafkaConsumer[topic-scm-file]) CSVPayloadProcessor.process() DETM-NKI7I92LX7P-5221-6-20000907.txt :   # of rows = 200
@@ -187,7 +187,7 @@ TO-DO
 
 === Grafana Dashboard
 
-. Grafana Admin credentials:  
+. Grafana Admin credentials:
 
 .. Local environment:  _admin / admin_
 .. OCP environment:
@@ -198,7 +198,7 @@ $ oc rsh -c grafana $POD env | grep GF_SECURITY_ADMIN_
 -----
 
 
-. First draft 
+. First draft
 +
 image::docs/images/b_kpis.png[]
 
@@ -208,7 +208,7 @@ image::docs/images/b_kpis.png[]
 . View microprofile generated metrics in JSON format
 +
 -----
-$ curl -H"Accept: application/json" localhost:8180/q/metrics/application 
+$ curl -H"Accept: application/json" localhost:8180/q/metrics/application
 -----
 +
 Example result:
