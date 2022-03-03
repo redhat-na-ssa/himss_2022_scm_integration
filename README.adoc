@@ -148,7 +148,7 @@ $ SCM_FRONTEND_HOST=$(oc get kservice scm-frontend -n user1-himss2022-scm --temp
 . Execute smoke test:
 +
 -----
-docker run --rm --name scm-datagen -e SCM_UPLOAD_TIMES=1 -e SCM_URL=$SCM_FRONTEND_HOST/gzippedFiles quay.io/jkeam/scm-datagen
+$ docker run --rm --name scm-datagen -e SCM_UPLOAD_TIMES=1 -e SCM_URL=$SCM_FRONTEND_HOST/gzippedFiles quay.io/jkeam/scm-datagen
 -----
 
 . Expected response should be similar to the following:
@@ -161,9 +161,11 @@ ALL FILES PERSISTED
 . The log of the _scm-backend_ pod should include statements such as the following:
 +
 -----
-oc logs $(oc get pods -o name -n user1-himss2022-scm | grep scm-backend | grep -v psql) -n user1-himss2022-scm
+$ oc logs $(oc get pods -o name -n user1-himss2022-scm | grep scm-backend | grep -v psql) -n user1-himss2022-scm
 -----
++
 
+Example Output
 +
 -----
 19:15:25 INFO  [co.re.hi.Routes] (Camel (camel-1) thread #4 - KafkaConsumer[topic-scm-file]) CSVPayloadProcessor.process() DETM-NKI7I92LX7P-5221-6-20000907.txt :   # of rows = 200
