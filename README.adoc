@@ -165,7 +165,7 @@ $ oc logs $(oc get pods -o name -n user1-himss2022-scm | grep scm-backend | grep
 -----
 +
 
-Example Output
+Example Output:
 +
 -----
 19:15:25 INFO  [co.re.hi.Routes] (Camel (camel-1) thread #4 - KafkaConsumer[topic-scm-file]) CSVPayloadProcessor.process() DETM-NKI7I92LX7P-5221-6-20000907.txt :   # of rows = 200
