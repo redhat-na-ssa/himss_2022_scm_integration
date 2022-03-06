@@ -5,7 +5,7 @@
     name: ../roles/operator_olm
     tasks_from: uninstall
   vars:
-    operator_name: amq-streams-operator
+    operator_name: strimzi-cluster-operator
     subscription_namespace: "{{ namespace_amq_streams_operator }}"
     subscription_name: "{{ amq_streams_operator_subscription_name }}"
     csv_prefix: "{{ amq_streams_operator_csv_prefix }}"

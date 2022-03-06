@@ -3,7 +3,7 @@
 # 1)  AMQ Streams Operator
 - set_fact:
     namespace: "{{ project_name }}"
-    work_dir_name: "amq-streams-operator"
+    work_dir_name: "strimzi-cluster-operator"
 - include_role:
     name: ../roles/amq_streams_operator
   when: >
