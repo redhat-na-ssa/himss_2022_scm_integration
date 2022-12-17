@@ -2,7 +2,8 @@ FROM registry.access.redhat.com/ubi8/ubi:8.5
 
 RUN yum -y update && yum -y install make gcc-c++
 
-RUN useradd --create-home --shell /bin/bash appuser
+RUN groupadd -g 1001 appuser
+RUN useradd --uid 1001 -g users -G appuser --create-home --shell /bin/bash appuser
 RUN mkdir -p /app/output/sent && mkdir /app/target && chown -R appuser.appuser /app
 WORKDIR /app
 COPY Makefile *.cpp *.h run.sh .

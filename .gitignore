@@ -7,7 +7,6 @@ target
 dependency-reduced-pom.xml
 .mvn
 .vscode
-**/*.tgz
 
 # Compiled class file
 *.class
