@@ -10,9 +10,9 @@ url=${url:-'http://localhost:8180/gzippedFiles'}
 function send_files() {
   for file in ./output/*.tgz
   do
-    echo -e "\nSending $file to $1"
-    curl -v -F "data=@$file" $1
-    sleep 1
+    echo -e "\n"
+    du -sh $file
+    echo -e "Sending $file to $1"
   done
 }
 
@@ -26,6 +26,6 @@ do
   # send data
   send_files $url
 
-  # delete data
+  # mark as sent
   mv ./output/*.tgz ./output/sent
 done
