@@ -36,7 +36,7 @@ items:
       requests:
         storage: {{ postgresql_pv_capacity }}
 - kind: DeploymentConfig
-  apiVersion: v1
+  apiVersion: apps.openshift.io/v1
   metadata:
     name: {{ psql_app_name }}
     labels:
