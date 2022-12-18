@@ -21,7 +21,7 @@ function send_files() {
 for (( i = 0; i < $max; i++ ))
 do
   # generate new data
-  ./target/scm-datagen
+  ./target/scm-datagen -r 5000
 
   # send data
   send_files $url

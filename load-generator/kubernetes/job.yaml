@@ -18,7 +18,7 @@ objects:
       spec:
         containers:
         - name: scm-datagen
-          image: quay.io/jkeam/scm-datagen@sha256:980e176c8b648f73c19a6823c26335a7fc2caf0f379f6947fd5ee04bbb670ce7
+          image: quay.io/jkeam/scm-datagen@sha256:163645160d26e819ac6f9184b25ca00c9598a3350b4ee4f7ccf256944c50936a
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
