@@ -43,7 +43,7 @@
   # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
   when: fips_enabled_cluster == "true"  
 
-- name: "if the cluster is fips enabled, update the envrionment variables"
+- name: "if the cluster is fips enabled, update the environment variables"
   shell: "{{ openshift_cli }} set env statefulset {{ kafka_cluster }}-zookeeper  JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
   # fix when above command is working
   # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
@@ -83,7 +83,7 @@
   # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
   when: fips_enabled_cluster == "true"  
 
-- name: "if the cluster is fips enabled, update the envrionment variables"
+- name: "if the cluster is fips enabled, update the environment variables"
   shell: "{{ openshift_cli }} set env statefulset {{ kafka_cluster }}-kafka  JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
   # fix when above command is working
   # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
@@ -119,7 +119,7 @@
 #   register: r_fips_env_var_set
 
 
-- name: "if the cluster is fips enabled, update the envrionment variables"
+- name: "if the cluster is fips enabled, update the environment variables"
   shell: "{{ openshift_cli }} set env deployment {{ kafka_cluster }}-entity-operator JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
   # fix when above command is working
   # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"

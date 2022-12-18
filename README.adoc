@@ -55,7 +55,7 @@ Ansible is included to deploy this application to OpenShift in a repeatable mann
 
 === Pre-reqs:
 
-. OpenShift Container Platform version 4.9.*. 
+. OpenShift Container Platform version 4.11.x
 +
 Resource requirements needed by the app (doesn’t include resource requirements of Openshift to support itself) is as follows:
 
@@ -84,6 +84,8 @@ Accessible without a RHN subscription
 ie: dnf install ansible
 
 . `git` installed locally
+
+. Latest oc (4.11), ansible (2.13), and ansible modules (community.okd:2.2.0)
 
 === Procedure:
 

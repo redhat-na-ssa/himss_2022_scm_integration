@@ -161,10 +161,9 @@
     files:
       - "{{ work_dir }}/{{ kafka_cluster_dashboard_template }}"
 
-
 - name: "obtain token for grafana serviceaccount"
   shell: |
-    {{ openshift_cli }} sa get-token grafana-serviceaccount -n {{ namespace_monitoring }}
+    {{ openshift_cli }} create token grafana-serviceaccount -n {{ namespace_monitoring }}
   register: grafana_sa_token
 
 - name: "copy openshift monitoring grafana datasource template {{ openshift_monitoring_datasource_template }}"

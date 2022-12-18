@@ -1,14 +1,7 @@
 ---
 
 - name: create test route
-  oc_route:
-    oc_binary: "{{ openshift_cli }}"
-    state: present
-    tls_termination: edge
-    name: testroute
-    service_name: testsvc
-    port: 80
-    namespace: "{{ namespace }}"
+  shell: "{{ openshift_cli }} create route edge testroute --service=testsvc --port=80 -n {{ namespace }}"
   when: ACTION is not defined or ACTION == "install"
 
 - name: get domain url
@@ -17,11 +10,7 @@
   when: ACTION is not defined or ACTION == "install"
 
 - name: delete test route
-  oc_route:
-    oc_binary: "{{ openshift_cli }}"
-    state: absent
-    name: testroute
-    namespace: "{{ namespace }}"
+  shell: "{{ openshift_cli }} delete route testroute -n {{ namespace }}"
   when: ACTION is not defined or ACTION == "install"
 
 - name: set ocp_domain fact

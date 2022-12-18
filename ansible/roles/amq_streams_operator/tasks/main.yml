@@ -49,10 +49,8 @@
 #   register: r_fips_env_var_set
 
 
-- name: "if the cluster is fips enabled, update the envrionment variables"
-  shell: "{{ openshift_cli }} set env deployment {{ amq_streams_operator_deployment_name }} JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false'"
-  # fix when above command is working
-  # when: r_fips_env_var_set == "0" and fips_enabled_cluster == "true"
+- name: "if the cluster is fips enabled, update the config variables"
+  shell: "{{ openshift_cli }} set env deployment {{ amq_streams_operator_deployment_name }} JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false' FIPS_MODE='disabled'"
   when: fips_enabled_cluster == "true"   
 
 
