@@ -16,18 +16,19 @@ objects:
       metadata:
         name: generate-load
       spec:
-        securityContext:
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - all
         containers:
         - name: scm-datagen
           image: quay.io/jkeam/scm-datagen@sha256:eb25228b200626f4bdb933a8eef834c91daf47af050868be7957657e3ea84420
           command: ["tail", "-f", "/dev/null"]
           securityContext:
             runAsUser: 1000720000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - "ALL"
+            seccompProfile:
+              type: "RuntimeDefault"
           env:
           - name: SCM_UPLOAD_TIMES
             value: "${SCM_UPLOAD_TIMES}"
