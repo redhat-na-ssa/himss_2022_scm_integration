@@ -1,6 +1,11 @@
 # SCM Load Test Generator
 This generates test data and then uploads that test data to some server using curl.
 
+## OCP Job
+
+Run the `create-job.sh` script.
+
+
 ## Running
 
 ```

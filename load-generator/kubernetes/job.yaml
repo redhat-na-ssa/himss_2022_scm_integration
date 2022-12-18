@@ -1,0 +1,42 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: generate-load-template
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: generate-load-job
+  spec:
+    parallelism: 1
+    completions: 1
+    activeDeadlineSeconds: 1800
+    backoffLimit: 6
+    template:
+      metadata:
+        name: generate-load
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+        containers:
+        - name: scm-datagen
+          image: quay.io/jkeam/scm-datagen@sha256:eb25228b200626f4bdb933a8eef834c91daf47af050868be7957657e3ea84420
+          command: ["tail", "-f", "/dev/null"]
+          securityContext:
+            runAsUser: 1000720000
+          env:
+          - name: SCM_UPLOAD_TIMES
+            value: "${SCM_UPLOAD_TIMES}"
+          - name: SCM_URL
+            value: "${SCM_URL}/gzippedFiles"
+        restartPolicy: OnFailure
+parameters:
+- name: SCM_URL
+  description: "SCM Frontend URL to upload to"
+- name: SCM_UPLOAD_TIMES
+  description: "Number of times you want files generated and uploaded"
+  value: "5"
