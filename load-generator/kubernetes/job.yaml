@@ -19,7 +19,6 @@ objects:
         containers:
         - name: scm-datagen
           image: quay.io/jkeam/scm-datagen@sha256:0eb42467a6889f22223b2fe38bc0977656940296f0812e6f5e72cb0b10b3034c
-          command: ["tail", "-f", "/dev/null"]
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
