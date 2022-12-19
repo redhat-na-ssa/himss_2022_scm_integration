@@ -129,7 +129,7 @@
   template:
     src:  "{{ resources_dir }}/{{ knative_kafka_template }}"
     dest: "{{ work_dir }}/{{ knative_kafka_template }}"
-  when: deploy_knativeakafka is defined and deploy_knativeakafka is true
+  when: deploy_knativeakafka is defined and deploy_knativeakafka == "true"
 
 - name: "check if {{ knative_kafka_name }} exists"
   oc_obj:
@@ -139,7 +139,7 @@
     namespace: "{{ namespace_knativeeventing }}"
     kind: KnativeKafka
   register: result
-  when: deploy_knativeakafka is defined and deploy_knativeakafka is true
+  when: deploy_knativeakafka is defined and deploy_knativeakafka == "true"
 
 - name: "deploy Knative Kafka"
   oc_list:
@@ -148,7 +148,7 @@
     namespace: "{{ namespace_knativeeventing }}"
     files:
       - "{{ work_dir }}/{{ knative_kafka_template }}"
-  when: result.ansible_module_results.stderr is defined and result.ansible_module_results.stderr != "" and deploy_knativeakafka is defined and deploy_knativeakafka is true
+  when: result.ansible_module_results.stderr is defined and result.ansible_module_results.stderr != "" and deploy_knativeakafka is defined and deploy_knativeakafka == "true"
 
 - name: "wait until KnativeKafka has started in {{ namespace_knativeeventing }}"
   oc_obj:
@@ -166,7 +166,7 @@
   - r_knativekafka.ansible_module_results | json_query(jmesquery) == ['True']
   vars:
     jmesquery: "status.conditions[?type == 'Ready'].status"
-  when: deploy_knativeakafka is defined and deploy_knativeakafka is true
+  when: deploy_knativeakafka is defined and deploy_knativeakafka == "true"
 
 - name: "test knative"
   shell:  "{{ openshift_cli }} get kservice"
