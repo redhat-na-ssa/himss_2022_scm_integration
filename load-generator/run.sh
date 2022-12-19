@@ -13,6 +13,7 @@ function send_files() {
     echo -e "\n"
     du -sh $file
     echo -e "Sending $file to $1"
+    curl --insecure -v -F "data=@$file" $1
   done
 }
 
