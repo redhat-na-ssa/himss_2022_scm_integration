@@ -6,7 +6,7 @@ keda_operator_deployment_name: keda-olm-operator
 keda_operator_subscription_name: keda
 keda_operator_subscription_channel: alpha
 keda_operator_subscription_automatic_installplan_approval: false
-keda_operator_subscription_starting_csv: "keda.v2.6.1"
+keda_operator_subscription_starting_csv: "keda.v2.7.1"
 # keda_operator_subscription_package_name
 keda_operator_subscription_catalog_source: community-operators
 keda_operator_subscription_catalog_source_namespace: openshift-marketplace

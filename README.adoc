@@ -85,7 +85,7 @@ ie: dnf install ansible
 
 . `git` installed locally
 
-. Latest oc (4.11), ansible (2.13), and ansible modules (community.okd:2.2.0)
+. Latest oc (4.11), ansible (2.13), ansible modules (community.okd:2.2.0), and potentially `jmespath` installed via `pip`
 
 === Procedure:
 
@@ -107,6 +107,13 @@ $ git clone https://github.com/redhat-naps-da/himss_2022_scm_integration
 $ cd ansible
 -----
 
+. Update `all.yml`
++
+-----
+$ vi ./ansible/playbooks/group_vars/all.yml
+# double check `project_admin` and `fips_enabled_cluster`
+-----
+
 . Deploy to OpenShift:
 +
 -----
@@ -116,7 +123,7 @@ $ ansible-playbook playbooks/install.yml
 If this is an OpenShift cluster with FIPS enabled,then run the following instead: 
 
 -----
-$ ansible-playbook --extra-vars '{"fips_enabled_cluster":"true"}' playbooks/install.yml
+$ ansible-playbook --extra-vars '{"fips_enabled_cluster": true}' playbooks/install.yml
 -----
 
 .. Deployment should complete in about 10 minutes.
@@ -141,7 +148,7 @@ $ ansible-playbook playbooks/uninstall.yml
 
 == Smoke Test
 
-. Set environment variable to _scm-frontend_ route exposed by KNative:
+. Set environment variable to _scm-frontend_ route exposed by Knative:
 +
 -----
 $ SCM_FRONTEND_HOST=$(oc get kservice scm-frontend -n user1-himss2022-scm --template='{{ .status.url }}' | sed 's/"//g')

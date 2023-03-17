@@ -16,5 +16,5 @@ spec:
       protocol: TCP
       targetPort: web
   selector:
-    app: prometheus
+    prometheus: prometheus
   sessionAffinity: None

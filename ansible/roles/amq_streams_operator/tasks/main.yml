@@ -51,8 +51,11 @@
 
 - name: "if the cluster is fips enabled, update the config variables"
   shell: "{{ openshift_cli }} set env deployment {{ amq_streams_operator_deployment_name }} JAVA_TOOL_OPTIONS='-Dcom.redhat.fips=false' FIPS_MODE='disabled'"
-  when: fips_enabled_cluster == "true"   
+  when: fips_enabled_cluster
 
+- name: "if the cluster is fips enabled, update the next config variables"
+  shell: "{{ openshift_cli }} patch deployment {{ amq_streams_operator_deployment_name }} -p '{\"spec\": {\"template\": {\"spec\":{\"containers\":[{\"name\": \"strimzi-cluster-operator\", \"env\": [{\"name\": \"FIPS_MODE\", \"value\": \"disabled\"}]}]}}}}'"
+  when: fips_enabled_cluster
 
 - name: "wait until amq streams operator is active"
   oc_obj:

@@ -7,7 +7,7 @@ prometheus_operator_deployment_name: prometheus-operator
 prometheus_operator_subscription_name: prometheus
 prometheus_operator_subscription_channel: beta
 prometheus_operator_subscription_automatic_installplan_approval: false
-prometheus_operator_subscription_starting_csv: "prometheusoperator.0.47.0"
+prometheus_operator_subscription_starting_csv: "prometheusoperator.0.56.3"
 prometheus_operator_csv_prefix: prometheusoperator
 
 # prometheus custom resource
