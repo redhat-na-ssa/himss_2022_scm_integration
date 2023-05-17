@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.activation.DataHandler;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.activation.DataHandler;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
 import org.apache.camel.Exchange;
@@ -37,9 +37,7 @@ public class Routes extends RouteBuilder {
         /*****                Consume from HTTP           *************/
         rest("/sanityCheck")
                 .get()
-                .route()
-                .setBody().constant("Good To Go!")
-                .endRest();
+                .to("direct:sanity");
 
         // curl -v -X POST -F "data=@src/test/himss/nogood/AM3X-365115-1002-1-2021285.txt" localhost:8180/gzippedFiles
         // curl -v -X POST -F "data=@src/test/himss/nogood/AM3X-365115-2021285.tgz" localhost:8180/gzippedFiles
@@ -51,6 +49,10 @@ public class Routes extends RouteBuilder {
           .consumes("multipart/form-data")
           .post()
           .to("direct:verifyPayload");
+
+        from("direct:sanity")
+            .setBody().constant("Good To Go!");
+
         
         from("direct:verifyPayload")
           .routeId("verifyPayload")

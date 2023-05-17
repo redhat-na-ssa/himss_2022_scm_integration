@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.activation.DataHandler;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.activation.DataHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.apache.camel.Exchange;
@@ -40,9 +40,10 @@ public class Routes extends RouteBuilder {
         /*****                Consume from HTTP           *************/
         rest("/sanityCheck")
                 .get()
-                .route()
-                .setBody().constant("Good To Go!")
-                .endRest();
+                .to("direct:sanity");
+        
+        from("direct:sanity")
+            .setBody().constant("Good To Go!");
 
         /************               Consume from Kafka          *****************/
         from("kafka:{{himss.scm_topic_name}}?brokers={{kafka.bootstrap.servers}}&groupId=scm&autoOffsetReset=earliest&consumersCount={{himss.kafka.consumer.count}}")
